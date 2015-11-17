@@ -1,2 +1,1 @@
-# xblock-diagnosticfeedback
-Diagnostic Feedback xblock 
+# diagnostic-feedback
