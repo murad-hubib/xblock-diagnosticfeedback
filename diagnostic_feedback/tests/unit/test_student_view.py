@@ -1,10 +1,7 @@
-__author__ = 'attiya'
-
 import json
 import os
 from base_test import BaseTest
 from .wizard_step_mixin import WizardStepMixin
-
 from nose.tools import (
     assert_equals
 )
@@ -43,7 +40,7 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
     def setUp(self):
         self._block = self.make_block()
         self._daignostic_answer = json.loads(self.load_json_resource('data/answer_diagnostic_test_data.json'))
-        self._buzz_feed_answer = json.loads(self.load_json_resource('data/answer_buzzfeed_test_data.json'))
+        self._buzzfeed_answer = json.loads(self.load_json_resource('data/answer_buzzfeed_test_data.json'))
 
     def test_diagnostic_answer(self):
 
@@ -93,10 +90,10 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                                         u'msg': u'Your response is saved',
                                         })
 
-    def test_buzz_feed_answer(self):
+    def test_buzzfeed_answer(self):
 
         # set quiz as buzfeed
-        res = self.save_wizard_step1(self._block.BUZ_FEED_QUIZ_VALUE)
+        res = self.save_wizard_step1(self._block.BUZZFEED_QUIZ_VALUE)
         assert_equals(res['success'], True)
 
         # set categories for buzz feed quiz
@@ -108,7 +105,7 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
         assert_equals(res['success'], True)
 
         for i, question_data in enumerate(self._block.questions):
-            for type, data in self._buzz_feed_answer.items():
+            for type, data in self._buzzfeed_answer.items():
                 if i == len(self._block.questions) - 1:
                     data['isLast'] = "True"
                 if type == 'missing_id':

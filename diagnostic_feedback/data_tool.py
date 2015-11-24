@@ -5,6 +5,7 @@ from xblock.fields import Scope, String, Dict, List
 from xblockutils.resources import ResourceLoader
 from .sub_api import SubmittingXBlockMixin, my_api
 from .tasks import export_dg_data as export_data_task
+
 loader = ResourceLoader(__name__)
 
 PAGE_SIZE = 15
@@ -13,6 +14,7 @@ PAGE_SIZE = 15
 # Make '_' a no-op so we can scrape strings
 def _(text):
     return text
+
 
 log = logging.getLogger(__name__)
 
@@ -131,7 +133,7 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             log.info(async_result.id)
             # The task is running asynchronously. Store the result ID so we can query its progress:
             self.active_export_task_id = async_result.id
-            #diagnostic_feedback.tasks.export_data
+            # diagnostic_feedback.tasks.export_data
         return self._get_status()
 
     @XBlock.json_handler

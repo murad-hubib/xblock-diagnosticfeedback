@@ -1,14 +1,11 @@
 import logging
 import copy
-
 from xblock.core import XBlock
 from xblock.fields import Scope, String, List, Integer, Dict
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
-
-from .resource import ResourceMixin
+from .mixins import ResourceMixin, XBlockWithTranslationServiceMixin
 from .quiz_result import QuizResultMixin
-
 from .helpers import MainHelper
 from .validators import Validator
 from .sub_api import my_api
@@ -18,78 +15,84 @@ log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
 
 
-@XBlock.wants('user')
-class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
-    """
+# Make '_' a no-op so we can scrape strings
+def _(text):
+    return text
 
+
+@XBlock.needs('i18n')
+@XBlock.wants('user')
+class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTranslationServiceMixin):
     """
-    BUZ_FEED_QUIZ_VALUE = "BFQ"
-    BUZ_FEED_QUIZ_LABEL = "Buzz Feed Quiz"
+    An XBlock which can be used to add diagnostic quiz
+    """
+    BUZZFEED_QUIZ_VALUE = "BFQ"
+    BUZZFEED_QUIZ_LABEL = _("BuzzFeed-style")
     DIAGNOSTIC_QUIZ_VALUE = "DG"
-    DIAGNOSTIC_QUIZ_LABEL = "Diagnostic Quiz"
+    DIAGNOSTIC_QUIZ_LABEL = _("Diagnostic-style")
 
     display_name = String(
-        display_name="Diagnostic Feedback",
-        help="This name appears in the horizontal navigation at the top of the page.",
+        display_name=_("Diagnostic Feedback"),
+        help=_("This name appears in the horizontal navigation at the top of the page."),
         scope=Scope.settings,
-        default="Diagnostic Feedback"
+        default=""
     )
 
     title = String(
         default='',
         scope=Scope.content,
-        help='Title of quiz'
+        help=_("Title of quiz")
     )
 
     description = String(
-        default='',
+        default="",
         scope=Scope.content,
-        help='Description of quiz'
+        help=_("Description of quiz")
     )
 
     questions = List(
         default=[],
-        help="This will hold list of question with respective choices",
+        help=_("This will hold list of question with respective choices"),
         scope=Scope.content,
     )
 
     student_choices = Dict(
         default={},
-        help="This will hold user provided answers of questions",
+        help=_("This will hold user provided answers of questions"),
         scope=Scope.user_state,
     )
 
     quiz_type = String(
-        default='',
+        default="",
         scope=Scope.content,
-        help='Type of quiz'
+        help=_("Type of quiz")
     )
 
     results = List(
         default=[],
         scope=Scope.content,
-        help='List of results'
+        help=_("List of results")
     )
 
     student_result = String(
         default='',
         scope=Scope.user_state,
-        help='Calculated feedback of each user'
+        help=_("Calculated feedback of each user")
     )
 
     types = List(
         default=[
-            {"value": BUZ_FEED_QUIZ_VALUE, "label": BUZ_FEED_QUIZ_LABEL},
+            {"value": BUZZFEED_QUIZ_VALUE, "label": BUZZFEED_QUIZ_LABEL},
             {"value": DIAGNOSTIC_QUIZ_VALUE, "label": DIAGNOSTIC_QUIZ_LABEL},
         ],
         scope=Scope.content,
-        help='List of results'
+        help=_("List of results")
     )
 
     current_step = Integer(
         default=0,
         scope=Scope.user_state,
-        help='To control which question should be shown to student'
+        help=_("To control which question should be shown to student")
     )
 
     def get_fragment(self, context, view='studio', json_args=None):
@@ -137,22 +140,13 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
             'user_is_staff': self.user_is_staff()
         }
 
-        from submissions import api as my_api
-        if my_api:
-            log.info("my api found")
-        else:
-            log.info("my api not found")
-
         if self.student_choices:
             self.append_choice(context['questions'])
 
         # return final result to show if user already completed the quiz
         if self.questions and self.current_step:
             if len(self.questions) == self.current_step:
-                if self.quiz_type == self.BUZ_FEED_QUIZ_VALUE:
-                    context['result'] = self.get_buzz_feed_result()
-                else:
-                    context['result'] = self.get_diagnostic_result()
+                context['result'] = self.get_result()
 
         return self.get_fragment(context, 'student')
 
@@ -169,7 +163,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
             {
                 'quiz_type': self.quiz_type,
                 'results': self.results,
-                'BUZ_FEED_QUIZ_VALUE': self.BUZ_FEED_QUIZ_VALUE,
+                'BUZZFEED_QUIZ_VALUE': self.BUZZFEED_QUIZ_VALUE,
                 'questions': self.questions,
                 'categoryTpl': loader.load_unicode('templates/underscore/category.html'),
                 'rangeTpl': loader.load_unicode('templates/underscore/range.html'),
@@ -177,7 +171,6 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
                 'choiceTpl': loader.load_unicode('templates/underscore/choice.html')
             }
         )
-
 
     @XBlock.json_handler
     def save_data(self, data, suffix=''):
@@ -194,7 +187,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
 
         if not step:
             success = False
-            response_message = 'missing step number'
+            response_message = self._('missing step number')
         else:
             try:
                 is_valid_data, response_message = Validator.validate(self, data)
@@ -209,7 +202,6 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
 
         return {'step': step, 'success': success, 'msg': response_message}
 
-
     @XBlock.json_handler
     def save_choice(self, data, suffix=''):
         """
@@ -219,11 +211,11 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
         :return: response dict
         """
 
-        result = ""
+        student_result = ""
         response_message = ""
 
         try:
-            success, response_message = Validator.validate_student_answer(data)
+            success, response_message = Validator.validate_student_answer(self, data)
             if success:
                 # save student answer
                 self.student_choices[data['question_id']] = data['student_choice']
@@ -241,18 +233,13 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
 
                 # calculate feedback result if user answering last question
                 if data['isLast']:
-                    if self.quiz_type == self.BUZ_FEED_QUIZ_VALUE:
-                        success = True
-                        result = self.get_buzz_feed_result()
-                    else:
-                        success = True
-                        result = self.get_diagnostic_result()
+                    student_result = self.get_result()
 
-                response_message = "Your response is saved"
+                response_message = self._("Your response is saved")
         except Exception as ex:
             success = False
             response_message += str(ex)
-        return {'success': success, 'student_result': result, 'msg': response_message}
+        return {'success': success, 'student_result': student_result, 'response_msg': response_message}
 
     @XBlock.json_handler
     def start_over_quiz(self, data, suffix=''):
@@ -264,17 +251,10 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock):
         """
 
         success = True
-        response_message = "student data cleared"
+        response_message = self._("student data cleared")
 
         self.student_choices = {}
         self.student_result = ""
         self.current_step = 0
 
         return {'success': success, 'msg': response_message}
-
-
-
-
-
-
-

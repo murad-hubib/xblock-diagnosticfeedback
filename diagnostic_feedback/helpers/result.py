@@ -1,4 +1,3 @@
-
 class Result(object):
     """
     hold shared attributes for category/range
@@ -7,5 +6,3 @@ class Result(object):
     image = ''
     internal_description = ''
     html_body = ''
-
-

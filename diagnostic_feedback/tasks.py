@@ -2,7 +2,6 @@
 Celery task for CSV student answer export.
 """
 import time
-
 from celery.task import task
 from celery.utils.log import get_task_logger
 from instructor_task.models import ReportStore
@@ -74,7 +73,6 @@ def _extract_data(course_key_str, block):
         # - For each submission, look up student's answer:
         answer_cache = {}
         for submission in submissions:
-
             answer = _get_answer(block, question, submission, answer_cache)
 
             rows.append([question_title, answer])

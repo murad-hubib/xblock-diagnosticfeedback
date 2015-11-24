@@ -71,21 +71,20 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_step':
-                assert_equals(res, {u'success': False, u"step": u"", u'msg': u'missing step number'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_title':
-                assert_equals(res, {u'success': False, u"step": 1, u'msg': u'title is required'})
+                assert_equals(res['success'], False)
             elif _type == 'invalid_type':
-                assert_equals(res, {u'success': False, u"step": 1, u'msg': u'type is invalid'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_title_type':
-                assert_equals(res, {u'success': False, u"step": 1, u'msg': u'title is required'})
-            elif _type == "missing_description" :
-                assert_equals(res, {u'success': False, u"step": 1, u'msg': u'description is required'})
+                assert_equals(res['success'], False)
+            elif _type == "missing_description":
+                assert_equals(res['success'], False)
             elif _type == 'valid_data':
-                assert_equals(res, {u'success': True, u"step": 1, u'msg': u'step 1 data saved'})
+                assert_equals(res['success'], True)
 
         assert_equals(self._block.title, 'Test')
         assert_equals(self._block.quiz_type, self._block.DIAGNOSTIC_QUIZ_VALUE)
-
 
     def test_buzfeed_wizard_step2(self):
 
@@ -100,21 +99,17 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             data = json.dumps(data)
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
             if _type == 'missing_categories':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'at least one category required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_id_case1':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'id is required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_id_case2':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'id is required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_name_case1':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'name is required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_name_case2':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'name is required'})
-            elif _type == 'invalid_image_case1':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'image invalid url'})
-            elif _type == 'invalid_image_case2':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'image invalid url'})
+                assert_equals(res['success'], False)
             elif _type == 'valid':
-                assert_equals(res, {u'success': True, u"step": 2, u'msg': u'step 2 data saved'})
+                assert_equals(res['success'], True)
 
         assert_equals(len(self._block.results), 2)
 
@@ -131,52 +126,27 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_ranges':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'at least one range required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_name_case1':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'name is required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_name_case2':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'name is required'})
-            elif _type == 'invalid_image_case1':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'image invalid url'})
-            elif _type == 'invalid_image_case2':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'image invalid url'})
-
+                assert_equals(res['success'], False)
             elif _type == 'min_max_case1':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'min/max values required'})
+                assert_equals(res['success'], False)
             elif _type == 'min_max_case2':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'min > max'})
+                assert_equals(res['success'], False)
             elif _type == 'min_max_case3':
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'min > max'})
-
+                assert_equals(res['success'], False)
             elif _type == 'overlapping_ranges_case1':
-                data = json.loads(data)
-                ranges = data['ranges']
-                error_message = 'overlapping ranges [{} - {}] & [{} - {}]'.format(ranges[0].get('min_value'),
-                                                                            ranges[0].get('max_value'),
-                                                                            ranges[1].get('min_value'),
-                                                                            ranges[1].get('max_value'))
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'{}'.format(error_message)})
+                assert_equals(res['success'], False)
             elif _type == 'overlapping_ranges_case2':
-                data = json.loads(data)
-                ranges = data['ranges']
-                error_message = 'overlapping ranges [{} - {}] & [{} - {}]'.format(ranges[0].get('min_value'),
-                                                                            ranges[0].get('max_value'),
-                                                                            ranges[2].get('min_value'),
-                                                                            ranges[2].get('max_value'))
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'{}'.format(error_message)})
+                assert_equals(res['success'], False)
             elif _type == 'overlapping_ranges_case3':
-                data = json.loads(data)
-                ranges = data['ranges']
-                error_message = 'overlapping ranges [{} - {}] & [{} - {}]'.format(ranges[1].get('min_value'),
-                                                                            ranges[1].get('max_value'),
-                                                                            ranges[2].get('min_value'),
-                                                                            ranges[2].get('max_value'))
-                assert_equals(res, {u'success': False, u"step": 2, u'msg': u'{}'.format(error_message)})
-
+                assert_equals(res['success'], False)
             elif _type == 'valid':
-                assert_equals(res, {u'success': True, u"step": 2, u'msg': u'step 2 data saved'})
+                assert_equals(res['success'], True)
 
-        assert_equals(len(self._block.results), 3)
+        assert_equals(len(self._block.results), 2)
 
     def test_buzfeed_wizard_step3(self):
         assert_equals(len(self._block.results), 0)
@@ -199,44 +169,37 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_questions':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'at least one question required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_id_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 id required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_id_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 id required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_txt_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 text required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_txt_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 text required'})
-
+                assert_equals(res['success'], False)
+            elif _type == 'missing_ques_title_case1':
+                assert_equals(res['success'], False)
+            elif _type == 'missing_ques_title_case2':
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_category_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' category required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_category_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' category required'})
+                assert_equals(res['success'], False)
             elif _type == 'invalid_ques_choice_category_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' invalid category_id found'})
+                assert_equals(res['success'], False)
             elif _type == 'invalid_ques_choice_category_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' invalid category_id found'})
-
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choices_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' choices list is missing'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choices_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' choices list is missing'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_txt_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' name required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_txt_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' name required'})
-
+                assert_equals(res['success'], False)
             elif _type == 'valid':
-                assert_equals(res, {u'success': True, u"step": 3, u'msg': u'step 3 data saved'})
+                assert_equals(res['success'], True)
 
         assert_equals(len(self._block.questions), 2)
 
@@ -261,42 +224,37 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_questions':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'at least one question required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_id_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 id required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_id_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 id required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_txt_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 text required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_txt_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 text required'})
-
+                assert_equals(res['success'], False)
+            elif _type == 'missing_ques_title_case1':
+                assert_equals(res['success'], False)
+            elif _type == 'missing_ques_title_case2':
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choices_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' choices list is missing'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choices_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' choices list is missing'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_txt_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' name required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_txt_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' name required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_value_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 1 having invalid choices.'
-                                                                           u' choice value required'})
+                assert_equals(res['success'], False)
             elif _type == 'missing_ques_choice_value_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'question 2 having invalid choices.'
-                                                                           u' choice value required'})
-
+                assert_equals(res['success'], False)
             elif _type == 'invalid_datatype_choice_value_case1':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'could not convert string to float: AA'})
-
+                assert_equals(res['success'], False)
             elif _type == 'invalid_datatype_choice_value_case2':
-                assert_equals(res, {u'success': False, u"step": 3, u'msg': u'could not convert string to float: BB'})
+                assert_equals(res['success'], False)
 
             elif _type == 'valid':
-                assert_equals(res, {u'success': True, u"step": 3, u'msg': u'step 3 data saved'})
+                assert_equals(res['success'], True)
 
         assert_equals(len(self._block.questions), 2)

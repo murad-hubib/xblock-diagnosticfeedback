@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Run tests for the Problem Builder XBlock
+Run tests for the Diagnostic Feedback XBlock
 
 This script is required to run our selenium tests inside the xblock-sdk workbench
 because the workbench SDK's settings file is not inside any python module.
@@ -11,6 +11,8 @@ import os
 import sys
 
 import logging
+
+logging.disable(logging.DEBUG)
 
 logging_level_overrides = {
     'workbench.views': logging.ERROR,
@@ -24,8 +26,15 @@ if __name__ == "__main__":
     # Configure a range of ports in case the default port of 8081 is in use
     os.environ.setdefault("DJANGO_LIVE_TEST_SERVER_ADDRESS", "localhost:8081-8099")
 
+    try:
+        os.mkdir('var')
+    except OSError:
+        # May already exist.
+        pass
+
     from django.conf import settings
     settings.INSTALLED_APPS += ("diagnostic_feedback", )
+
 
     for noisy_logger, log_level in logging_level_overrides.iteritems():
         logging.getLogger(noisy_logger).setLevel(log_level)

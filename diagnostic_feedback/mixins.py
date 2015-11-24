@@ -1,7 +1,17 @@
 from .config import student_assets, studio_assets
-
 from xblockutils.resources import ResourceLoader
+
 loader = ResourceLoader(__name__)
+
+
+class XBlockWithTranslationServiceMixin(object):
+    """
+    Mixin providing access to i18n service
+    """
+    def _(self, text):
+        """ Translate text """
+        # noinspection PyUnresolvedReferences
+        return self.runtime.service(self, "i18n").ugettext(text)
 
 
 class ResourceMixin(object):

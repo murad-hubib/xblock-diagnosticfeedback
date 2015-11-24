@@ -28,7 +28,7 @@ studio_assets = {
         ('public/css/message.css', 2)
     ],
     'js': [
-        #libs
+        # libs
         ('http://ajax.aspnetcdn.com/ajax/jquery.validate/1.12.0/jquery.validate.min.js', 0),
         ('public/js/libs/jquery.steps.js', 1),
         ('public/js/libs/underscore.js', 2),
@@ -49,4 +49,3 @@ studio_assets = {
         ('templates/studio/wizard.html', 0)
     ]
 }
-

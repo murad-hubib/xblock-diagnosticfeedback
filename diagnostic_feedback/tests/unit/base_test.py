@@ -9,11 +9,6 @@ from xblock.runtime import KvsFieldData, DictKeyValueStore
 import diagnostic_feedback
 
 
-
-# Silence too verbose Django logging
-logging.disable(logging.DEBUG)
-
-
 class BaseTest(unittest.TestCase):
 
     def make_request(self, body, method='POST'):
@@ -22,7 +17,6 @@ class BaseTest(unittest.TestCase):
         request.body = body.encode('utf-8')
         request.method = method
         return request
-
 
     def make_block(self):
         block_type = 'diagnostic_feedback'
