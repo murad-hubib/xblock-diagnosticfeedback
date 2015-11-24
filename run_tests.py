@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Run tests for the Diagnostic Feedback XBlock
-
-This script is required to run our selenium tests inside the xblock-sdk workbench
-because the workbench SDK's settings file is not inside any python module.
 """
 
 import os
