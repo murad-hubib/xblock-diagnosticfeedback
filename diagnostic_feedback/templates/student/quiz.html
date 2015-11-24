@@ -44,10 +44,7 @@
             <section id="response" class="question-container">
                 <div id="response_body">
                     {% if result %}
-                        {% if result.img %}
-                            <img class="result-img" src="{{result.img}}" alt="{{result.name}}">
-                        {% endif %}
-                        <div class="html_body">{{result.html_body|safe}}</div>
+                        {{result.html_body|safe}}
                     {% endif %}
                 </div>
             </section>

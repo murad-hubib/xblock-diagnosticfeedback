@@ -19,7 +19,7 @@ class QuizResultMixin(object):
 
     def get_buzzfeed_result(self):
         """
-            Calculate the result of Buzz Feed Quiz type
+            Calculate the result of BuzzFeed Quiz type
         """
         result = {
             'id': '',

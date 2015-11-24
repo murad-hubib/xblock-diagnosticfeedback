@@ -92,16 +92,16 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
 
     def test_buzzfeed_answer(self):
 
-        # set quiz as buzfeed
+        # set quiz as buzzfeed
         res = self.save_wizard_step1(self._block.BUZZFEED_QUIZ_VALUE)
         assert_equals(res['success'], True)
 
-        # set categories for buzz feed quiz
-        res = self.save_buzfeed_step2()
+        # set categories for buzzfeed quiz
+        res = self.save_buzzfeed_step2()
         assert_equals(res['success'], True)
 
-        # set questions for buzz feed Quiz
-        res = self.save_buzfeed_step3()
+        # set questions for buzzfeed Quiz
+        res = self.save_buzzfeed_step3()
         assert_equals(res['success'], True)
 
         for i, question_data in enumerate(self._block.questions):
