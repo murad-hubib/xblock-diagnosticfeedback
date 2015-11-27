@@ -95,7 +95,6 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
     @XBlock.json_handler
     def start_export(self, data, suffix=''):
         """ Start a new asynchronous export """
-        block_type = "QuizBlock"
         log.info("------------ in start_export ---------------")
         root_block_id = self.scope_ids.usage_id
         root_block_id = unicode(getattr(root_block_id, 'block_id', root_block_id))
@@ -133,7 +132,7 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             log.info(async_result.id)
             # The task is running asynchronously. Store the result ID so we can query its progress:
             self.active_export_task_id = async_result.id
-            # diagnostic_feedback.tasks.export_data
+
         return self._get_status()
 
     @XBlock.json_handler

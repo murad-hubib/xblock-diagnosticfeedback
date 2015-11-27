@@ -5,7 +5,8 @@ function Quiz(runtime, element, initData) {
   var customValidator = new CustomValidator(runtime, element, initData),
     common = new Common(runtime, element, initData),
     studioCommon = new StudioCommon(runtime, element, initData),
-    setting = new Setting(runtime, element, initData);
+    setting = new Setting(runtime, element, initData),
+    editQuestionPanel = ".diagnostic-feedback #edit_questionnaire_panel";
 
   if (typeof gettext == "undefined") {
     window.gettext = function gettext_stub(string) {
@@ -26,21 +27,23 @@ function Quiz(runtime, element, initData) {
     var $form = $(".diagnostic-feedback #questionnaire-form", element),
       $step1Panel = $(".diagnostic-feedback section[step='1']", element),
 
-    // child selector' which are either searched in an element already in current XBlock instance scope OR
-    // used as combination with some other selector, will be scoped to current XBlock instance (if required)
-    // at their usage places
-      editQuestionPanel = ".diagnostic-feedback #edit_questionnaire_panel",
+      // child selector' which are either searched in an element already in current XBlock instance scope OR
+      // used as combination with some other selector, will be scoped to current XBlock instance (if required)
+      // at their usage places
+
       categoriesPanel = '.diagnostic-feedback #categories_panel',
       addNewCategoryBtn = categoriesPanel + ' .add-new-category',
       deleteCategoryBtn = '.delete-category',
       categorySelector = '.category',
       editorSelector = '.custom-textarea',
 
+      accordionSelector = '#accordion',
+      accordionGrpSelector = ".group",
+
       rangesPanel = '#ranges_panel',
       addNewRangeBtn = rangesPanel + ' .add-new-range',
       deleteRangeBtn = '.delete-range',
       rangeSelector = '.range',
-
 
       step3Panel = ".diagnostic-feedback section[step='3']",
       questionPanel = '.diagnostic-feedback #questions_panel',
@@ -54,16 +57,24 @@ function Quiz(runtime, element, initData) {
       toolTipSelector = '.diagnostic-feedback .custom-tooltip',
       closeMsgBtnSelector = '#close_msg';
 
-    renderSteps();
-
     function renderSteps() {
+      // render all steps html as XBlock studio view load
+
       if (initData.quiz_type == "") {
+        // when first time studio view opens with no initData
         studioCommon.renderCategories();
+        studioCommon.createAccordion(categoriesPanel+ " " + accordionSelector, 'categories');
+
         studioCommon.renderRanges();
+        studioCommon.createAccordion(rangesPanel+ " " + accordionSelector, 'ranges');
       } else if (initData.quiz_type == initData.BUZZFEED_QUIZ_VALUE) {
+        // when editing buzzfeed-style quiz
         studioCommon.renderCategories();
+        studioCommon.createAccordion(categoriesPanel+ " " + accordionSelector, 'categories');
       } else {
+        // when editing dignostic-style quiz
         studioCommon.renderRanges();
+        studioCommon.createAccordion(rangesPanel+ " " + accordionSelector, 'ranges');
       }
       studioCommon.renderQuestions();
     }
@@ -78,6 +89,11 @@ function Quiz(runtime, element, initData) {
           } else {
             $(element).next(toolTipSelector).remove();
           }
+
+          var groups = $(element).parents('.group');
+          if(groups.length > 0){
+            groups.removeClass('group-error');
+          }
         },
         errorPlacement: function errorPlacement(error, element) {
           var container = $('<div />');
@@ -87,6 +103,11 @@ function Quiz(runtime, element, initData) {
             error.insertAfter(element.prev());
           } else {
             error.insertAfter(element);
+          }
+
+          var groups = element.parents('.group');
+          if(groups.length > 0){
+            groups.addClass('group-error');
           }
 
           error.wrap(container);
@@ -152,8 +173,16 @@ function Quiz(runtime, element, initData) {
       // send validated step data to server, this method will return true/false
       // if return true next stepp will be loaded
       // if return false validation errors will be shown
-      debugger;
-      var customValidated = false;
+
+     var fieldToIgnore = [
+         'section:visible .skip-validation',
+         'section:hidden input',
+         'section:hidden textarea',
+         'section:hidden select'
+       ],
+        quizType = studioCommon.getQuizType(),
+        customValidated = false;
+
       tinyMCE.triggerSave();
 
       if (currentIndex > newIndex) {
@@ -166,15 +195,25 @@ function Quiz(runtime, element, initData) {
         //execute both server side & js validations if on in setting.js
         if (setting.jsValidation) {
           //ignore hidden fields; will validate on current step showing fields
-          //form.validate().settings.ignore = ":disabled,:hidden";
-          var fieldToIgnore = [
-            'section:visible .skip-validation',
-            'section:visible input:hidden',
-            'section:visible select:hidden',
-            'section:hidden input',
-            'section:hidden textarea',
-            'section:hidden select',
-          ]
+          if (currentStep == 2 ) {
+              if (quizType == initData.BUZZFEED_QUIZ_VALUE){
+                  fieldToIgnore = fieldToIgnore.concat([
+                      'section:visible #ranges_panel input:hidden',
+                      'section:visible #ranges_panel select:hidden'
+                  ]);
+              } else {
+                  fieldToIgnore = fieldToIgnore.concat([
+                      'section:visible #categories_panel input:hidden',
+                      'section:visible #categories_panel select:hidden'
+                  ]);
+              }
+
+          } else {
+              fieldToIgnore = fieldToIgnore.concat([
+                  'section:visible input:hidden',
+                  'section:visible select:hidden'
+              ]);
+          }
           $form.validate().settings.ignore = fieldToIgnore.join(", ");
 
           // run jquery.validate
@@ -223,10 +262,12 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        existingCategories = link.prevAll(categorySelector).length;
+        existingCategories = link.prev().find(accordionGrpSelector).length;
 
       studioCommon.renderSingleCategory(existingCategories);
       studioCommon.initiateHtmlEditor($(categoriesPanel, element));
+      studioCommon.refreshAccordion(categoriesPanel + " " + accordionSelector);
+      studioCommon.bindSortTitleSources();
     });
 
     $(addNewRangeBtn, element).click(function (eventObject) {
@@ -234,10 +275,12 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        existingRanges = link.prevAll(rangeSelector).length;
+        existingRanges = link.prev().find(accordionGrpSelector).length;
 
       studioCommon.renderSingleRange(existingRanges);
       studioCommon.initiateHtmlEditor($(rangesPanel));
+      studioCommon.refreshAccordion(rangesPanel + " " + accordionSelector);
+      studioCommon.bindSortTitleSources();
     });
 
     $(step3Panel, element).on('click', addNewQuestionBtn, function (eventObject) {
@@ -285,30 +328,22 @@ function Quiz(runtime, element, initData) {
       } else {
         // ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this category?'))) {
-          var category = $(btn).parent(categorySelector);
+          var category = $(btn).parents(accordionGrpSelector);
 
           //remove deleted category html at step3 from all category selection dropdowns
           studioCommon.removeCategoryFromOptions(category);
 
           //remove all tinymce binding before deleting category html
-          studioCommon.destroyEditor($(category).find('textarea'));
+          studioCommon.destroyAllEditors(categoriesContainer);
 
           //remove category html from DOM at current step
           category.remove();
 
-          // rename all remaining categories fields after deletion of a category
-          var remainingCategories = categoriesContainer.find(categorySelector);
-          $.each(remainingCategories, function (i, category) {
-            var fields = $(category).find('input[type="text"], input[type="hidden"], textarea');
-            $.each(fields, function (k, field) {
-              //remove all previous tinymce attachments
-              studioCommon.destroyEditor(field);
-              studioCommon.updateFieldAttr($(field), i);
-            });
-          });
+          // refresh accordion
+          studioCommon.refreshAccordion(categoriesPanel + " " + accordionSelector);
 
-          // Re-attach text editor after field renaming
-          studioCommon.initiateHtmlEditor($(categoriesPanel));
+          // rename all remaining categories fields after deletion of a category
+          studioCommon.processCategories(categoriesContainer);
         }
       }
     });
@@ -330,22 +365,16 @@ function Quiz(runtime, element, initData) {
       } else {
         // ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this range?'))) {
-          var range = $(btn).parent(rangeSelector);
-          studioCommon.destroyEditor($(range).find('textarea'));
+          var range = $(btn).parents(accordionGrpSelector);
+          studioCommon.destroyAllEditors(rangesContainer);
+
           range.remove();
 
-          var remainingRanges = rangesContainer.find(rangeSelector);
-          $.each(remainingRanges, function (i, range) {
-            var fields = $(range).find('input[type="text"], input[type="number"], input[type="hidden"], textarea');
-            $.each(fields, function (k, field) {
-              //remove all previous tinymce attachments
-              studioCommon.destroyEditor(field);
-              studioCommon.updateFieldAttr($(field), i);
-            });
-          });
+          // refresh accordion
+          studioCommon.refreshAccordion(rangesPanel + " " + accordionSelector);
 
-          // re-attach text editor after field renaming
-          studioCommon.initiateHtmlEditor($(rangesPanel));
+          // rename all remaining categories fields after deletion of a category
+          studioCommon.processRanges(rangesContainer);
         }
       }
     });
@@ -441,8 +470,22 @@ function Quiz(runtime, element, initData) {
       msgDiv.slideUp('slow');
     });
 
+
+    renderSteps();
     studioCommon.initiateHtmlEditor($step1Panel, true);
+    studioCommon.bindSortTitleSources();
 
+    $('.action-cancel').click(function (eventObject) {
+      // notify runtime that modal windows is going to close
+      eventObject.preventDefault();
+      studioCommon.notify('destoryEditors', {});
+    });
+
+    runtime.listenTo('destoryEditors', function(){
+      // Destroy all editor as modal window closed
+      studioCommon.destroyAllEditors($(editQuestionPanel, element));
+      runtime.modal.editOptions.refresh(runtime.modal.xblockInfo);
+    });
   });
-
+  
 }

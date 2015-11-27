@@ -13,20 +13,26 @@ function StudioCommon(runtime, element, initData) {
   var commonObj = this,
     setting = new Setting(),
 
-  // selector' to scope elements for the current XBlock instance, to
-  // differentiate multiple diagnostic feedback blocks on one page
+    // selector' to scope elements for the current XBlock instance, to
+    // differentiate multiple diagnostic feedback blocks on one page
     $loadingDiv = $('.diagnostic-feedback .wizard-loading', element),
     $editQuizPanel = $('.diagnostic-feedback #edit_questionnaire_panel', element),
-    $questionPanelObj = $('.diagnostic-feedback #questions_panel', element),
 
-  // child selector' which are either searched in an element already in current XBlock instance scope OR
-  // used as combination with some other selector, will be scoped to current XBlock instance (if required)
-  // at their usage places
+    // child selector' which are either searched in an element already in current XBlock instance scope OR
+    // used as combination with some other selector, will be scoped to current XBlock instance (if required)
+    // at their usage places
     quizTitleSelector = '.diagnostic-feedback input[name="title"]',
     quizTypeSelector = '.diagnostic-feedback #type option:selected',
     quizTypeInputSelector = '.diagnostic-feedback input[name="type"]',
     quizDescriptionSelector = '.diagnostic-feedback textarea[name="description"]',
+    accordionSelector = '#accordion',
 
+    sortTitleSelector = '.sort-title',
+    sortTitleSrcSelector = '.sort-title-source',
+
+    accordionGrpSelector = ".group",
+
+    editQuestionPanel = ".diagnostic-feedback #edit_questionnaire_panel",
     questionPanelSelector = '.diagnostic-feedback #questions_panel',
     questionSelector = '.question',
     questionOrderSelector = '.q-order',
@@ -40,11 +46,14 @@ function StudioCommon(runtime, element, initData) {
     categorySelector = '.category',
     categoryIdSelector = 'input[name*="category[id]"]',
     categoryNameSelector = "input[name^='category[name]']",
-    addNewCategorySelector = '.add-new-category',
+    categoryOrderSelector = ".category-order",
+    categoryOrderFieldSelector = "input[id*='category[order]']",
     tinyMceTextarea = '.custom-textarea',
 
     rangesPanel = '.diagnostic-feedback #ranges_panel',
-    addNewRangeBtnSelector = '.add-new-range',
+    rangeSelector = '.range',
+    rangeOrderSelector = ".range-order",
+    rangeOrderFieldSelector = "input[id*='range[order]']",
 
     allChoiceValuesInputs = '.diagnostic-feedback .answer-choice .answer-value',
     allResultChoicesDropdowns = '.diagnostic-feedback .answer-choice .result-choice',
@@ -55,6 +64,13 @@ function StudioCommon(runtime, element, initData) {
     allResultChoiceSelector = '.diagnostic-feedback .result-choice',
     choiceNameClsSelector = '.answer-txt';
 
+
+  commonObj.notify = function (name, data){
+    // Notification interface does not exist in the workbench.
+    if (runtime.notify) {
+      runtime.notify(name, data);
+    }
+  };
 
   commonObj.showQuizForm = function () {
     // show quiz wizard html after popup resources loading
@@ -74,9 +90,8 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.closeModal = function (modal) {
     // close studio edit popup
-
+    commonObj.notify('destoryEditors', {});
     modal.cancel();
-    location.reload();
   };
 
   commonObj.sumArray = function (_array) {
@@ -88,6 +103,23 @@ function StudioCommon(runtime, element, initData) {
     });
     return total;
   };
+
+  commonObj.updateResultSortTitle = function(eventObject){
+    eventObject.preventDefault();
+
+    var _input = $(eventObject.currentTarget),
+      inputVal = $(_input).val() === '' ? gettext("Untitled") : $(_input).val();
+
+    $(_input).parents(accordionGrpSelector).find(sortTitleSelector)
+      .html(inputVal)
+  };
+
+  commonObj.bindSortTitleSources = function(){
+    $.each($(editQuestionPanel, element).find(sortTitleSrcSelector), function(){
+      $(this).unbind('keyup');
+      $(this).bind('keyup', commonObj.updateResultSortTitle);
+    });
+  }
 
   commonObj.getAllWQuestionsChoices = function () {
     // return array of array for all choices values of all questions
@@ -155,6 +187,17 @@ function StudioCommon(runtime, element, initData) {
     return categories;
   };
 
+  commonObj.destroyAllEditors = function(container){
+    // destory all editors instances in a specific container
+    var editors = container.find(tinyMceTextarea);
+    $.each(editors, function(i, editor){
+      if ($(editor).tinymce()) {
+        //remove existing attached instances
+        $(editor).tinymce().destroy();
+      }
+    });
+  };
+
   commonObj.destroyEditor = function (editor) {
     //check if an intance already attached with any textarea
     if ($(editor).tinymce()) {
@@ -216,8 +259,6 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.updateAllResultDropwdowns = function (categories) {
     // update html of all results dropdowns to sync with categories added at step2
-    debugger;
-    //var dropDowns = $(".result-choice");
     var dropDowns = $(allResultChoicesDropdowns, element);
     $.each(dropDowns, function (i, dropdown) {
       var mappingOptions = commonObj.generateResultsHtml($(dropdown), categories);
@@ -258,7 +299,7 @@ function StudioCommon(runtime, element, initData) {
     var quizType = commonObj.getQuizType();
     if (step == 1) {
       // for 2nd step of wizard
-      if (quizType == 'BFQ') {
+      if (quizType == initData.BUZZFEED_QUIZ_VALUE) {
         // in case of quiz type is BuzzFeed
         // show categories html
         // hide ranges html
@@ -293,7 +334,7 @@ function StudioCommon(runtime, element, initData) {
         $(allResultChoicesDropdowns, element).hide();
         $(allChoiceValuesInputs, element).show();
       }
-      commonObj.initiateHtmlEditor($questionPanelObj, true);
+      commonObj.initiateHtmlEditor($(questionPanelSelector, element), true);
     }
   };
 
@@ -352,11 +393,12 @@ function StudioCommon(runtime, element, initData) {
       }
 
       var name = this.value,
+        catOrder = $('input[name="category[order][' + order + ']"]').val(),
         image = $('input[name="category[image][' + order + ']"]').val(),
         internalDescription = $('input[name="category[internal_description][' + order + ']"]').val(),
         htmlBody = $('textarea[name="category[html_body][' + order + ']"]').val();
 
-      return {id: id, name: name, image: image, internal_description: internalDescription, html_body: htmlBody};
+      return {id: id, name: name, order: catOrder,  image: image, internal_description: internalDescription, html_body: htmlBody};
     }).get();
   };
 
@@ -365,6 +407,7 @@ function StudioCommon(runtime, element, initData) {
     return $('input[name^="' + fieldName + '"]').map(function () {
       var order = $(this).attr('name').split('][')[1].replace(']', ''),
         name = this.value,
+        rangeOrder = $('input[name="range[order][' + order + ']"]').val(),
         minValue = $('input[name="range[min][' + order + ']"]').val(),
         maxValue = $('input[name="range[max][' + order + ']"]').val(),
         image = $('input[name="range[image][' + order + ']"]').val(),
@@ -372,7 +415,7 @@ function StudioCommon(runtime, element, initData) {
         htmlBody = $('textarea[name="range[html_body][' + order + ']"]').val();
 
       return {
-        name: name, min_value: minValue, max_value: maxValue, image: image,
+        name: name, order: rangeOrder, min_value: minValue, max_value: maxValue, image: image,
         internal_description: internalDescription, html_body: htmlBody
       };
     }).get();
@@ -437,6 +480,78 @@ function StudioCommon(runtime, element, initData) {
     return {'questions': questions};
   };
 
+  commonObj.refreshAccordion = function(_id){
+  // refresg an instance of jquery-accordion
+    $( _id ).accordion('refresh');
+  };
+
+  commonObj.processCategories = function(categoriesContainer){
+    //update attributes of all category fields after sort/delete
+    var remainingCategories = categoriesContainer.find(categorySelector);
+
+    $.each(remainingCategories, function (i, category) {
+      var fields = $(category).find('input[type="text"], input[type="hidden"], textarea');
+
+      $(category).parent().prev().find(categoryOrderSelector).html(i + 1);
+      $(category).find(categoryOrderFieldSelector).val(i);
+
+      $.each(fields, function (k, field) {
+          commonObj.updateFieldAttr($(field), i);
+      });
+    });
+
+    // Re-attach text editor after field renaming
+    commonObj.initiateHtmlEditor($(categoriesPanel));
+  };
+
+  commonObj.processRanges = function(rangesContainer){
+    //update attributes of all range fields after sort/delete
+
+    var remainingRanges = rangesContainer.find(rangeSelector);
+    $.each(remainingRanges, function (i, range) {
+      var fields = $(range).find('input[type="text"], input[type="number"], input[type="hidden"], textarea');
+
+      $(range).parent().prev().find(rangeOrderSelector).html(i + 1);
+      $(range).find(rangeOrderFieldSelector).val(i);
+
+      $.each(fields, function (k, field) {
+          commonObj.updateFieldAttr($(field), i);
+      });
+    });
+
+    // re-attach text editor after field renaming
+    commonObj.initiateHtmlEditor($(rangesPanel));
+  };
+
+  commonObj.createAccordion = function(_id, type) {
+    // attach jquery-accordion with an element
+      $( _id )
+      .accordion({
+        active: 0,
+        header: '> div > h3',
+        autoHeight: false,
+        collapsible: true
+      })
+      .sortable({
+        axis: 'y',
+        handle: 'h3',
+        stop: function( event, ui ) {
+          // IE doesn't register the blur when sorting
+          // so trigger focusout handlers to remove .ui-state-focus
+          ui.item.children( 'h3' ).triggerHandler( 'focusout' );
+          if (type == 'categories'){
+            var categoriesContainer = $(categoriesPanel);
+            commonObj.destroyAllEditors(categoriesContainer);
+            commonObj.processCategories(categoriesContainer);
+          } else {
+            var rangesContainer = $(rangesPanel);
+            commonObj.destroyAllEditors(rangesContainer);
+            commonObj.processRanges(rangesContainer);
+          }
+        }
+      });
+    };
+
   commonObj.removeCategoryFromOptions = function (category) {
     // remove category option from all result dropdowns at step 3
     var categoryId = category.find(categoryIdSelector).val();
@@ -461,7 +576,7 @@ function StudioCommon(runtime, element, initData) {
     var tpl = _.template(initData.categoryTpl),
       html = tpl(category);
 
-    $(html).insertBefore($(categoriesPanel, element).find(addNewCategorySelector));
+    $(categoriesPanel).find(accordionSelector).append(html);
   };
 
   commonObj.renderSingleRange = function (order, range) {
@@ -476,7 +591,7 @@ function StudioCommon(runtime, element, initData) {
     var tpl = _.template(initData.rangeTpl),
       html = tpl(range);
 
-    $(html).insertBefore($(rangesPanel, element).find(addNewRangeBtnSelector));
+    $(rangesPanel).find(accordionSelector).append(html);
   };
 
 
@@ -538,7 +653,6 @@ function StudioCommon(runtime, element, initData) {
 
     $(html).insertBefore($(questionPanelSelector).find(addQuestionSelector));
   };
-
 
   commonObj.renderCategories = function () {
     //Render all categories html

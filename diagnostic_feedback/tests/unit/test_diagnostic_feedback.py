@@ -44,7 +44,7 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
         self._block = self.make_block()
         self._step1_data = self.load_step_data(1)
         self._step2_data = self.load_step_data(2)
-        self._step3_buzzfeed_data = self.load_step_data(3, self._block.BUZ_FEED_QUIZ_VALUE)
+        self._step3_buzzfeed_data = self.load_step_data(3, self._block.BUZZFEED_QUIZ_VALUE)
         self._step3_diagnostic_data = self.load_step_data(3, self._block.DIAGNOSTIC_QUIZ_VALUE)
 
     def tearDown(self):
@@ -59,7 +59,7 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
         elif step == 2:
             return json.loads(self.load_json_resource('data/step2_test_data.json'))
         elif step == 3:
-            if quiz_type == self._block.BUZ_FEED_QUIZ_VALUE:
+            if quiz_type == self._block.BUZZFEED_QUIZ_VALUE:
                 return json.loads(self.load_json_resource('data/step3_buzzfeed_test_data.json'))
             else:
                 return json.loads(self.load_json_resource('data/step3_diagnostic_test_data.json'))
@@ -91,7 +91,7 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
         assert_equals(len(self._block.results), 0)
 
         # set quiz as buzzfeed
-        res = self.save_wizard_step1(self._block.BUZ_FEED_QUIZ_VALUE)
+        res = self.save_wizard_step1(self._block.BUZZFEED_QUIZ_VALUE)
         assert_equals(res['success'], True)
 
         # test all related cases
@@ -152,7 +152,7 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
         assert_equals(len(self._block.results), 0)
 
         # add buzzfeed quiz
-        res = self.save_wizard_step1(self._block.BUZ_FEED_QUIZ_VALUE)
+        res = self.save_wizard_step1(self._block.BUZZFEED_QUIZ_VALUE)
         assert_equals(res['success'], True)
 
         # add categories for buz-feed quiz
