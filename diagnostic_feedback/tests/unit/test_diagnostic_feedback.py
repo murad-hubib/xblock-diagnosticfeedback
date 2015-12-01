@@ -3,10 +3,7 @@ import os
 from base_test import BaseTest
 from .wizard_step_mixin import WizardStepMixin
 
-from nose.tools import (
-    assert_equals, assert_true, assert_false,
-    assert_in
-)
+from nose.tools import (assert_equals)
 
 
 class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):

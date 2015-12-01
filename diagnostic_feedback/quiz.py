@@ -95,6 +95,10 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         help=_("To control which question should be shown to student")
     )
 
+    @property
+    def display_name_with_default(self):
+        return self.title
+
     def get_fragment(self, context, view='studio', json_args=None):
         """
         return fragment after loading css/js/html either for studio OR student view
@@ -164,6 +168,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                 'quiz_type': self.quiz_type,
                 'results': self.results,
                 'BUZZFEED_QUIZ_VALUE': self.BUZZFEED_QUIZ_VALUE,
+                'DIAGNOSTIC_QUIZ_VALUE': self.DIAGNOSTIC_QUIZ_VALUE,
                 'questions': self.questions,
                 'categoryTpl': loader.load_unicode('templates/underscore/category.html'),
                 'rangeTpl': loader.load_unicode('templates/underscore/range.html'),

@@ -1,4 +1,3 @@
-import collections
 
 
 class StudentResultPresenter(object):
@@ -8,8 +7,8 @@ class StudentResultPresenter(object):
         self.html_body = data.get('html_body', '')
 
     def generate_result(self):
-        return {_property: getattr(self, _property) for _property in dir(self) if not _property.startswith('__')
-                and not callable(getattr(self, _property))}
+        return {_property: getattr(self, _property) for _property in dir(self) if
+                not _property.startswith('__') and not callable(getattr(self, _property))}
 
 
 class QuizResultMixin(object):

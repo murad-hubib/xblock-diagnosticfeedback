@@ -1,4 +1,3 @@
-import logging
 import unittest
 
 from webob import Request

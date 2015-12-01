@@ -32,7 +32,6 @@ if __name__ == "__main__":
     from django.conf import settings
     settings.INSTALLED_APPS += ("diagnostic_feedback", )
 
-
     for noisy_logger, log_level in logging_level_overrides.iteritems():
         logging.getLogger(noisy_logger).setLevel(log_level)
 

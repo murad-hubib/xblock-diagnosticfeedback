@@ -35,7 +35,7 @@
                                         </select>
                                         {% else %}
                                         <p class="label setting-label">{% trans "Quiz Type" %}
-    {% for t in self.types %} {% if t.value == self.quiz_type %} {{t.label}} {% endif %} {% endfor %}</p>
+    </p>{% for t in self.types %} {% if t.value == self.quiz_type %} {{t.label}} {% endif %} {% endfor %}
                                         <input type="hidden" id="type" name="type" value="{{ self.quiz_type }}"/>
                                         {% endif %}
                                     </div>
@@ -57,6 +57,7 @@
                         <section step="2">
                             <div id="categories_panel" class="fields-container hide">
                                 <h4>{% trans "Categories" %} *</h4>
+                                <span class="text-help">{% trans "Drag a collapsed category to prioritize for tie-breaking." %}</span>
                                 <div id='accordion'>
 
                                </div>
@@ -65,7 +66,8 @@
                                     {% trans "Add Category" %}</a>
                             </div>
                             <div id="ranges_panel" class="fields-container hide">
-                                <h3>{% trans "Range(s)" %}</h3>
+                                <h3>{% trans "Ranges" %}</h3>
+                                <span class="text-help">{% trans "Drag a collapsed range to prioritize for tie-breaking." %}</span>
                                 <div id='accordion'>
 
                                </div>

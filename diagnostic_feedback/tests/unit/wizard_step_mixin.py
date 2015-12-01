@@ -2,12 +2,12 @@ import json
 
 
 class WizardStepMixin(object):
-    def save_wizard_step1(self, type):
+    def save_wizard_step1(self, _type):
         res = json.loads(self._block.handle('save_data', self.make_request(json.dumps({
             "step": 1,
             "title": "Test",
             "description": "Test description",
-            "type": type
+            "type": _type
         }))).body)
         return res
 

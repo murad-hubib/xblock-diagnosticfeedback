@@ -138,3 +138,8 @@
 .diagnostic-feedback-studio .group-error {
     border-top: 3px outset #ff0000;
 }
+
+.diagnostic-feedback-studio .text-help {
+    font-size: 1.2rem;
+    line-height: 1.776rem;
+}

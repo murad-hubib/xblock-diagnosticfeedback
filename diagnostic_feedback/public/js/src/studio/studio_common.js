@@ -81,11 +81,11 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getQuizType = function () {
     // get type of quiz from DOM
-    var type = $(quizTypeSelector, element).val();
-    if (!type) {
-      type = $(quizTypeInputSelector, element).val();
+    var q_type = $(quizTypeSelector, element).val();
+    if (!q_type) {
+      q_type = $(quizTypeInputSelector, element).val();
     }
-    return type;
+    return q_type ? q_type : "";
   };
 
   commonObj.closeModal = function (modal) {
@@ -182,7 +182,9 @@ function StudioCommon(runtime, element, initData) {
     $.each($(categoriesPanel, element).find(categorySelector), function (i, category) {
       var id = $(category).find(categoryIdSelector).val();
       var name = $(category).find(categoryNameSelector).val();
-      categories.push({id: id, name: name});
+      if(name !== "") {
+        categories.push({id: id, name: name});
+      }
     });
     return categories;
   };
@@ -383,7 +385,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getCategoriesList = function (fieldName) {
     // Get list of categories at step2
-    return $('input[name^="' + fieldName + '"]').map(function () {
+    return $('input[name^="' + fieldName + '"]', element).map(function () {
       var order = $(this).attr('name').split('][')[1].replace(']', ''),
         id = $('input[name="category[id][' + order + ']"]').val();
 
@@ -398,13 +400,14 @@ function StudioCommon(runtime, element, initData) {
         internalDescription = $('input[name="category[internal_description][' + order + ']"]').val(),
         htmlBody = $('textarea[name="category[html_body][' + order + ']"]').val();
 
-      return {id: id, name: name, order: catOrder,  image: image, internal_description: internalDescription, html_body: htmlBody};
+      return {id: id, name: name, order: catOrder,  image: image, internal_description: internalDescription,
+        html_body: htmlBody};
     }).get();
   };
 
   commonObj.getRangesList = function (fieldName) {
     // Get list of ranges at step2
-    return $('input[name^="' + fieldName + '"]').map(function () {
+    return $('input[name^="' + fieldName + '"]', element).map(function () {
       var order = $(this).attr('name').split('][')[1].replace(']', ''),
         name = this.value,
         rangeOrder = $('input[name="range[order][' + order + ']"]').val(),
@@ -610,6 +613,7 @@ function StudioCommon(runtime, element, initData) {
     choice['resultChoicesOptions'] = commonObj.getChoicesList();
     choice['quiz_type'] = quizType;
     choice['BUZZFEED_QUIZ_VALUE'] = initData.BUZZFEED_QUIZ_VALUE;
+    choice['DIAGNOSTIC_QUIZ_VALUE'] = initData.DIAGNOSTIC_QUIZ_VALUE;
 
     if (returnChoiceObj) {
       return choice;
@@ -623,7 +627,6 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.renderSingleQuestion = function (order, question) {
     //Render html for a single question
-
     if (typeof question == 'undefined') {
       question = {
         id: '',

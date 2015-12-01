@@ -2,10 +2,8 @@ import json
 import os
 from base_test import BaseTest
 from .wizard_step_mixin import WizardStepMixin
-from nose.tools import (
-    assert_equals
-)
 
+from nose.tools import (assert_equals)
 
 class StudentViewAjaxTest(BaseTest, WizardStepMixin):
     _oldMaxDiff = None
@@ -57,23 +55,23 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
         assert_equals(res['success'], True)
 
         for i, question_data in enumerate(self._block.questions):
-            for type, data in self._daignostic_answer.items():
+            for _type, data in self._daignostic_answer.items():
                 if i == len(self._block.questions) - 1:
                     data['isLast'] = "True"
-                if type == 'missing_id':
+                if _type == 'missing_id':
                     data['question_id'] = ''
                 else:
                     data['question_id'] = question_data["id"]
                 json_data = json.dumps(data)
                 res = json.loads(self._block.handle('save_choice', self.make_request(json_data)).body)
-                if type == 'missing_choice':
+                if _type == 'missing_choice':
                     assert_equals(res,
                                   {u'success': False, u'student_result': u'', 'msg': u'Student Choice is required'})
-                elif type == 'missing_id':
+                elif _type == 'missing_id':
                     assert_equals(res, {u'success': False, u'student_result': u'', u'msg': u'question id is required'})
-                elif type == 'missing_step':
+                elif _type == 'missing_step':
                     assert_equals(res, {u'success': False, u'student_result': u'', u'msg': u'current step is required'})
-                elif type == 'valid_data':
+                elif _type == 'valid_data':
                     if data['isLast'] == "True":
 
                         assert_equals(res, {u'success': True, u'student_result': {u'html_body': u'',
@@ -82,7 +80,7 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                                             u'msg': u'Your response is saved'})
                     else:
                         assert_equals(res, {u'success': True, u'student_result': '', u'msg': u'Your response is saved'})
-                elif type == "range_dont_exist":
+                elif _type == "range_dont_exist":
                     assert_equals(res, {u'success': True,
                                         u'student_result': {u'html_body': u'we cannot calculate your outcome',
                                                             u'img': u'',
@@ -105,23 +103,23 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
         assert_equals(res['success'], True)
 
         for i, question_data in enumerate(self._block.questions):
-            for type, data in self._buzzfeed_answer.items():
+            for _type, data in self._buzzfeed_answer.items():
                 if i == len(self._block.questions) - 1:
                     data['isLast'] = "True"
-                if type == 'missing_id':
+                if _type == 'missing_id':
                     data['question_id'] = ''
                 else:
                     data['question_id'] = question_data["id"]
                 json_data = json.dumps(data)
                 res = json.loads(self._block.handle('save_choice', self.make_request(json_data)).body)
-                if type == 'missing_choice':
+                if _type == 'missing_choice':
                     assert_equals(res,
                                   {u'success': False, u'student_result': u'', 'msg': u'Student Choice is required'})
-                elif type == 'missing_id':
+                elif _type == 'missing_id':
                     assert_equals(res, {u'success': False, u'student_result': u'', u'msg': u'question id is required'})
-                elif type == 'missing_step':
+                elif _type == 'missing_step':
                     assert_equals(res, {u'success': False, u'student_result': u'', u'msg': u'current step is required'})
-                elif type == 'valid_data':
+                elif _type == 'valid_data':
                     if data['isLast'] == "True":
                         assert_equals(res, {u'success': True, u'student_result': {u'html_body': u'',
                                                                                   u'img': u'http://xyz.com',

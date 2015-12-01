@@ -1,4 +1,4 @@
-from . import CategoryValidator, RangeValidator, QuizValidator, QuestionValidator, StudentChoiceValidator, BaseValidator
+from . import CategoryValidator, RangeValidator, QuizValidator, QuestionValidator, StudentChoiceValidator
 
 
 class Validator(object):
