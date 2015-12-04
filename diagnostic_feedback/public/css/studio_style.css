@@ -8,7 +8,7 @@
     display: block;
 }
 
-.diagnostic-feedback-studio #edit_questionnaire_panel {
+.diagnostic-feedback-studio .edit_questionnaire_panel {
     padding: 2px;
 }
 

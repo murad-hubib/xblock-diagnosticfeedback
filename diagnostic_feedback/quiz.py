@@ -132,15 +132,25 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
             else:
                 question['student_choice'] = self.student_choices.get(question['id'], '')
 
+    def get_block_id(self):
+        """
+        Return ID of `block`
+        """
+        usage_id = self.scope_ids.usage_id
+        # Try accessing block ID. If usage_id does not have it, return usage_id itself
+        return unicode(getattr(usage_id, 'block_id', usage_id))
+
     def student_view(self, context=None):
         """
         it will loads student view
         :param context: context
         :return: fragment
         """
+
         context = {
             'questions': copy.deepcopy(self.questions),
             'self': self,
+            'block_id': "xblock-{}".format(self.get_block_id()),
             'user_is_staff': self.user_is_staff()
         }
 
@@ -160,12 +170,16 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         :param context: context
         :return: fragment
         """
+        block_id = "xblock-{}".format(self.get_block_id())
         context['self'] = self
+        context['block_id'] = block_id
+
         return self.get_fragment(
             context,
             'studio',
             {
                 'quiz_type': self.quiz_type,
+                'block_id': block_id,
                 'results': self.results,
                 'BUZZFEED_QUIZ_VALUE': self.BUZZFEED_QUIZ_VALUE,
                 'DIAGNOSTIC_QUIZ_VALUE': self.DIAGNOSTIC_QUIZ_VALUE,

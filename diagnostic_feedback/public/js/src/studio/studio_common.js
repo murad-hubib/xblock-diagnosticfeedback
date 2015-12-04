@@ -16,24 +16,24 @@ function StudioCommon(runtime, element, initData) {
     // selector' to scope elements for the current XBlock instance, to
     // differentiate multiple diagnostic feedback blocks on one page
     $loadingDiv = $('.diagnostic-feedback .wizard-loading', element),
-    $editQuizPanel = $('.diagnostic-feedback #edit_questionnaire_panel', element),
+    $editQuizPanel = $('.diagnostic-feedback .edit_questionnaire_panel', element),
 
     // child selector' which are either searched in an element already in current XBlock instance scope OR
     // used as combination with some other selector, will be scoped to current XBlock instance (if required)
     // at their usage places
-    quizTitleSelector = '.diagnostic-feedback input[name="title"]',
-    quizTypeSelector = '.diagnostic-feedback #type option:selected',
-    quizTypeInputSelector = '.diagnostic-feedback input[name="type"]',
-    quizDescriptionSelector = '.diagnostic-feedback textarea[name="description"]',
-    accordionSelector = '#accordion',
+    quizTitleSelector = '.diagnostic-feedback input[name*="title"]',
+    quizTypeSelector = '.diagnostic-feedback select[name*="type"] option:selected',
+    quizTypeInputSelector = '.diagnostic-feedback input[name*="type"]',
+    quizDescriptionSelector = '.diagnostic-feedback textarea[name*="description"]',
+    accordionSelector = '.accordion',
 
     sortTitleSelector = '.sort-title',
     sortTitleSrcSelector = '.sort-title-source',
 
     accordionGrpSelector = ".group",
 
-    editQuestionPanel = ".diagnostic-feedback #edit_questionnaire_panel",
-    questionPanelSelector = '.diagnostic-feedback #questions_panel',
+    editQuestionPanel = ".diagnostic-feedback .edit_questionnaire_panel",
+    questionPanelSelector = '.diagnostic-feedback .questions_panel',
     questionSelector = '.question',
     questionOrderSelector = '.q-order',
     questionIdSelector = '.question-id',
@@ -42,18 +42,18 @@ function StudioCommon(runtime, element, initData) {
     questionTitleFieldSelector = '.question-title',
     addQuestionSelector = '.add-new-question',
 
-    categoriesPanel = ".diagnostic-feedback #categories_panel",
+    categoriesPanel = ".diagnostic-feedback .categories_panel",
     categorySelector = '.category',
     categoryIdSelector = 'input[name*="category[id]"]',
-    categoryNameSelector = "input[name^='category[name]']",
+    categoryNameSelector = "input[name*='category[name]']",
     categoryOrderSelector = ".category-order",
-    categoryOrderFieldSelector = "input[id*='category[order]']",
+    categoryOrderFieldSelector = "input[name*='category[order]']",
     tinyMceTextarea = '.custom-textarea',
 
-    rangesPanel = '.diagnostic-feedback #ranges_panel',
+    rangesPanel = '.diagnostic-feedback .ranges_panel',
     rangeSelector = '.range',
     rangeOrderSelector = ".range-order",
-    rangeOrderFieldSelector = "input[id*='range[order]']",
+    rangeOrderFieldSelector = "input[name*='range[order]']",
 
     allChoiceValuesInputs = '.diagnostic-feedback .answer-choice .answer-value',
     allResultChoicesDropdowns = '.diagnostic-feedback .answer-choice .result-choice',
@@ -177,7 +177,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getChoicesList = function () {
     // Get array of values for categories added at step2
-
+    
     var categories = [];
     $.each($(categoriesPanel, element).find(categorySelector), function (i, category) {
       var id = $(category).find(categoryIdSelector).val();
@@ -297,7 +297,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.updateNextForm = function (step, previousStepData) {
     // Manipulate DOM of next step in wizard, based on the last step selections
-
+    
     var quizType = commonObj.getQuizType();
     if (step == 1) {
       // for 2nd step of wizard
@@ -342,7 +342,6 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.updateFieldAttr = function (field, order) {
     // update the name/id of a single category/range filed
-
     var previousName = field.attr('name').split("][")[0];
     var newName = previousName + "][" + order + "]";
     field.attr({name: newName, id: newName});
@@ -352,8 +351,8 @@ function StudioCommon(runtime, element, initData) {
     //Update name/id attributes of a given question-txt field
 
     $(question).find(questionOrderSelector).html(i + 1);
-    var questionTitle = 'question[' + i + '][title]';
-    var questionText = 'question[' + i + '][text]';
+    var questionTitle = initData.block_id + '_question[' + i + '][title]';
+    var questionText = initData.block_id + '_question[' + i + '][text]';
     $(question).find(questionTitleFieldSelector).first().attr({'name': questionTitle, id: questionTitle});
     $(question).find(questionTxtFieldSelector).first().attr({'name': questionText, id: questionText});
   };
@@ -385,20 +384,20 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getCategoriesList = function (fieldName) {
     // Get list of categories at step2
-    return $('input[name^="' + fieldName + '"]', element).map(function () {
+    return $('input[name*="' + fieldName + '"]', element).map(function () {
       var order = $(this).attr('name').split('][')[1].replace(']', ''),
-        id = $('input[name="category[id][' + order + ']"]').val();
+        id = $('input[name*="category[id][' + order + ']"]', element).val();
 
       if (!id) {
         id = commonObj.generateUniqueId();
-        $('input[name="category[id][' + order + ']"]').val(id);
+        $('input[name*="category[id][' + order + ']"]', element).val(id);
       }
 
       var name = this.value,
-        catOrder = $('input[name="category[order][' + order + ']"]').val(),
-        image = $('input[name="category[image][' + order + ']"]').val(),
-        internalDescription = $('input[name="category[internal_description][' + order + ']"]').val(),
-        htmlBody = $('textarea[name="category[html_body][' + order + ']"]').val();
+        catOrder = $('input[name*="category[order][' + order + ']"]', element).val(),
+        image = $('input[name*="category[image][' + order + ']"]', element).val(),
+        internalDescription = $('input[name*="category[internal_description][' + order + ']"]', element).val(),
+        htmlBody = $('textarea[name*="category[html_body][' + order + ']"]', element).val();
 
       return {id: id, name: name, order: catOrder,  image: image, internal_description: internalDescription,
         html_body: htmlBody};
@@ -407,15 +406,15 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getRangesList = function (fieldName) {
     // Get list of ranges at step2
-    return $('input[name^="' + fieldName + '"]', element).map(function () {
+    return $('input[name*="' + fieldName + '"]', element).map(function () {
       var order = $(this).attr('name').split('][')[1].replace(']', ''),
         name = this.value,
-        rangeOrder = $('input[name="range[order][' + order + ']"]').val(),
-        minValue = $('input[name="range[min][' + order + ']"]').val(),
-        maxValue = $('input[name="range[max][' + order + ']"]').val(),
-        image = $('input[name="range[image][' + order + ']"]').val(),
-        internalDescription = $('input[name="range[internal_description][' + order + ']"]').val(),
-        htmlBody = $('textarea[name="range[html_body][' + order + ']"]').val();
+        rangeOrder = $('input[name*="range[order][' + order + ']"]', element).val(),
+        minValue = $('input[name*="range[min][' + order + ']"]', element).val(),
+        maxValue = $('input[name*="range[max][' + order + ']"]', element).val(),
+        image = $('input[name*="range[image][' + order + ']"]', element).val(),
+        internalDescription = $('input[name*="range[internal_description][' + order + ']"]', element).val(),
+        htmlBody = $('textarea[name*="range[html_body][' + order + ']"]', element).val();
 
       return {
         name: name, order: rangeOrder, min_value: minValue, max_value: maxValue, image: image,
@@ -426,6 +425,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getStep1Data = function () {
     // Return first step data
+    
     var type = commonObj.getQuizType();
     return {
       title: $(quizTitleSelector, element).val(),
@@ -489,6 +489,7 @@ function StudioCommon(runtime, element, initData) {
   };
 
   commonObj.processCategories = function(categoriesContainer){
+
     //update attributes of all category fields after sort/delete
     var remainingCategories = categoriesContainer.find(categorySelector);
 
@@ -532,7 +533,7 @@ function StudioCommon(runtime, element, initData) {
       .accordion({
         active: 0,
         header: '> div > h3',
-        autoHeight: false,
+        autoHeight: true,
         collapsible: true
       })
       .sortable({
@@ -565,7 +566,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.renderSingleCategory = function (order, category) {
     //Render html for a single category
-
+    
     if (typeof category == 'undefined') {
       category = {id: '', name: '', image: '', internal_description: '', html_body: ''};
     }
@@ -575,6 +576,7 @@ function StudioCommon(runtime, element, initData) {
     }
 
     category['order'] = order;
+    category['block_id'] = initData.block_id;
 
     var tpl = _.template(initData.categoryTpl),
       html = tpl(category);
@@ -590,6 +592,7 @@ function StudioCommon(runtime, element, initData) {
     }
 
     range['order'] = order;
+    range['block_id'] = initData.block_id;
 
     var tpl = _.template(initData.rangeTpl),
       html = tpl(range);
@@ -609,6 +612,7 @@ function StudioCommon(runtime, element, initData) {
     }
 
     choice['q_order'] = qOrder;
+    choice['block_id'] = initData.block_id;
     choice['c_order'] = cOrder;
     choice['resultChoicesOptions'] = commonObj.getChoicesList();
     choice['quiz_type'] = quizType;
@@ -637,6 +641,7 @@ function StudioCommon(runtime, element, initData) {
     }
 
     question['order'] = order;
+    question['block_id'] = initData.block_id;
 
     // Render if questiong already have choices
     if (question.choices.length > 0) {

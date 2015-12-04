@@ -5,6 +5,7 @@ from .wizard_step_mixin import WizardStepMixin
 
 from nose.tools import (assert_equals)
 
+
 class StudentViewAjaxTest(BaseTest, WizardStepMixin):
     _oldMaxDiff = None
 

@@ -1,12 +1,11 @@
 function Quiz(runtime, element, initData) {
   // contain js related to studio quiz wizard
-
   // import related js helpers
   var customValidator = new CustomValidator(runtime, element, initData),
     common = new Common(runtime, element, initData),
     studioCommon = new StudioCommon(runtime, element, initData),
     setting = new Setting(runtime, element, initData),
-    editQuestionPanel = ".diagnostic-feedback #edit_questionnaire_panel";
+    editQuestionPanel = ".diagnostic-feedback .edit_questionnaire_panel";
 
   if (typeof gettext == "undefined") {
     window.gettext = function gettext_stub(string) {
@@ -24,29 +23,29 @@ function Quiz(runtime, element, initData) {
 
     // selector' to scope elements for the current XBlock instance, to
     // differentiate multiple diagnostic feedback blocks on one page
-    var $form = $(".diagnostic-feedback #questionnaire-form", element),
+    var $form = $(".diagnostic-feedback .questionnaire-form", element),
       $step1Panel = $(".diagnostic-feedback section[step='1']", element),
 
       // child selector' which are either searched in an element already in current XBlock instance scope OR
       // used as combination with some other selector, will be scoped to current XBlock instance (if required)
       // at their usage places
 
-      categoriesPanel = '.diagnostic-feedback #categories_panel',
+      categoriesPanel = '.diagnostic-feedback .categories_panel',
       addNewCategoryBtn = categoriesPanel + ' .add-new-category',
       deleteCategoryBtn = '.delete-category',
       categorySelector = '.category',
       editorSelector = '.custom-textarea',
 
-      accordionSelector = '#accordion',
+      accordionSelector = '.accordion',
       accordionGrpSelector = ".group",
 
-      rangesPanel = '#ranges_panel',
+      rangesPanel = '.ranges_panel',
       addNewRangeBtn = rangesPanel + ' .add-new-range',
       deleteRangeBtn = '.delete-range',
       rangeSelector = '.range',
 
       step3Panel = ".diagnostic-feedback section[step='3']",
-      questionPanel = '.diagnostic-feedback #questions_panel',
+      questionPanel = '.diagnostic-feedback .questions_panel',
       addNewQuestionBtn = '.add-new-question',
       deleteQuestionBtn = '.delete-question',
       questionSelector = '.question',
@@ -55,7 +54,7 @@ function Quiz(runtime, element, initData) {
       deleteChoiceBtn = '.delete-choice',
       choiceSelector = '.answer-choice',
       toolTipSelector = '.diagnostic-feedback .custom-tooltip',
-      closeMsgBtnSelector = '#close_msg';
+      closeMsgBtnSelector = '.close_msg';
 
     function renderSteps() {
       // render all steps html as XBlock studio view load
@@ -151,7 +150,7 @@ function Quiz(runtime, element, initData) {
                 gettext('Your data has been successfully saved.') +
                 '<br />' +
                 gettext('However, some answer combinations may not belong to any result.') +
-                '<a id="close_msg" href="#" style="float: right">' +
+                '<a class="close_msg" href="#" style="float: right">' +
                 gettext('Close') +
                 '</a>'
               });
@@ -198,13 +197,13 @@ function Quiz(runtime, element, initData) {
           if (currentStep == 2 ) {
               if (quizType == initData.BUZZFEED_QUIZ_VALUE){
                   fieldToIgnore = fieldToIgnore.concat([
-                      'section:visible #ranges_panel input:hidden',
-                      'section:visible #ranges_panel select:hidden'
+                      'section:visible .ranges_panel input:hidden',
+                      'section:visible .ranges_panel select:hidden'
                   ]);
               } else {
                   fieldToIgnore = fieldToIgnore.concat([
-                      'section:visible #categories_panel input:hidden',
-                      'section:visible #categories_panel select:hidden'
+                      'section:visible .categories_panel input:hidden',
+                      'section:visible .categories_panel select:hidden'
                   ]);
               }
 
@@ -455,11 +454,11 @@ function Quiz(runtime, element, initData) {
       }
     });
 
-    $(questionPanel, element).on('change', 'select', function (eventObject) {
-      // add attribute selected='select' on selection option
-      var select = $(eventObject.currentTarget).find("option:selected");
-      select.attr({'selected': 'selected'});
-    });
+    //$(questionPanel, element).on('change', 'select', function (eventObject) {
+    //  // add attribute selected='select' on selection option
+    //  var select = $(eventObject.currentTarget).find("option:selected");
+    //  select.attr({'selected': 'selected'});
+    //});
 
     $(editQuestionPanel, element).on('click', closeMsgBtnSelector, function (eventObject) {
       eventObject.preventDefault();

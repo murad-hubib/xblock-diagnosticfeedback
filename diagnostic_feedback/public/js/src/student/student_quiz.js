@@ -25,15 +25,15 @@ function StudentQuiz(runtime, element) {
 
     // selector' to scope elements for the current XBlock instance, to
     // differentiate multiple diagnostic feedback blocks on one page
-      $exportProgress = $('.diagnostic-feedback #export_progress', element),
-      $form = $(".diagnostic-feedback #student_view_form", element),
+      $exportProgress = $('.diagnostic-feedback .export_progress', element),
+      $form = $(".diagnostic-feedback .student_view_form", element),
 
     // child selector' which are either searched in an element already in current XBlock instance scope OR
     // used as combination with some other selector, will be scoped to current XBlock instance (if required)
     // at their usage places
-      finalResult = '.diagnostic-feedback #response_body',
-      studentViewFormSelector = ".diagnostic-feedback #student_view_form",
-      completedStepSelector = ".diagnostic-feedback #completed_step",
+      finalResult = '.diagnostic-feedback .response_body',
+      studentViewFormSelector = ".diagnostic-feedback .student_view_form",
+      completedStepSelector = ".diagnostic-feedback .completed_step",
       nextActionSelector = '.diagnostic-feedback ul[role="menu"] a[href*="next"]',
       previousActionSelector = '.diagnostic-feedback ul[role="menu"] a[href*="previous"]',
       finishActionSelector = '.diagnostic-feedback ul[role="menu"] a[href*="finish"]',
@@ -42,10 +42,10 @@ function StudentQuiz(runtime, element) {
       choiceSelector = '.diagnostic-feedback .answer-choice',
       visibleAnswerChoice = 'section.answer-choice.current',
       currentAnswerContainer = ".diagnostic-feedback .current",
-      studentViewFormSecSelector = ".diagnostic-feedback #student_view_form section",
+      studentViewFormSecSelector = ".diagnostic-feedback .student_view_form section",
       questionId = '.question-id',
       selectedStudentChoice = 'input[type="radio"]:checked',
-      exportDataBtnSelector = "#export_data";
+      exportDataBtnSelector = ".export_data";
 
 
     $form.children("div").steps({

@@ -7,9 +7,9 @@ function CustomValidator(runtime, element, initData) {
     common = new Common(runtime, element, initData),
 
   //selectors
-    rangeMinSelector = "input[name^='range[min]']",
-    rangeMaxSelector = "input[name^='range[max]']",
-    rangesPanel = '.diagnostic-feedback #ranges_panel',
+    rangeMinSelector = "input[name*='range[min]']",
+    rangeMaxSelector = "input[name*='range[max]']",
+    rangesPanel = '.diagnostic-feedback .ranges_panel',
     rangeSelector = '.range';
 
   if (typeof gettext == "undefined") {
@@ -22,6 +22,7 @@ function CustomValidator(runtime, element, initData) {
   }
 
   validatorObj.validateMinMax = function (range) {
+    debugger
     // validate each range for
     // if any range having min_value > max_value
     // check if ranges values are int OR float
