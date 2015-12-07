@@ -67,8 +67,7 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
             course_key = getattr(self.scope_ids.usage_id, 'course_key', None)
             return dict(report_store.links_for(course_key)).get(self.last_export_result['report_filename'])
-        except Exception as ex:
-        # in case of unit testing, lms is usually not available
+        except Exception:
             pass
 
     def _get_status(self):
@@ -112,6 +111,8 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             log.info("------------ in start_export - my_api found ---------------")
         else:
             log.info("------------ in start_export - my_api not found ---------------")
+        
+        from .tasks import export_data as export_data_task  # Import here since this is edX LMS specific
         async_result = export_data_task.delay(
             # course_id not available in workbench.
             unicode(getattr(self.runtime, 'course_id', 'course_id')),

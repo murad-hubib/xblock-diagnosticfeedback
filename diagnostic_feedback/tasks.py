@@ -53,7 +53,7 @@ def export_dg_data(course_id, source_block_id_str):
             "display_data": [] if len(rows) == 1 else rows
         }
 
-    except Exception, e:
+    except Exception:
         pass
 
     return response
