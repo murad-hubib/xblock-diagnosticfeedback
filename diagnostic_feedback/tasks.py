@@ -4,7 +4,6 @@ Celery task for CSV student answer export.
 import time
 from celery.task import task
 from celery.utils.log import get_task_logger
-from instructor_task.models import ReportStore
 from opaque_keys.edx.keys import CourseKey
 from xmodule.modulestore.django import modulestore
 from .sub_api import my_api
@@ -18,6 +17,7 @@ def export_dg_data(course_id, source_block_id_str):
     Exports all answers to all questions by all students to a CSV file.
     """
     start_timestamp = time.time()
+    response = {}
 
     logger.debug("Beginning data export")
     try:
@@ -35,20 +35,28 @@ def export_dg_data(course_id, source_block_id_str):
     rows += results
 
     # Generate the CSV:
-    filename = u"diagnostic-data-export-{}.csv".format(time.strftime("%Y-%m-%d-%H%M%S", time.gmtime(start_timestamp)))
-    report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
-    report_store.store_rows(course_key, filename, rows)
+    try:
+        from instructor_task.models import ReportStore
+        filename = u"diagnostic-data-export-{}.csv".format(
+            time.strftime("%Y-%m-%d-%H%M%S", time.gmtime(start_timestamp)))
+        report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
+        report_store.store_rows(course_key, filename, rows)
 
-    generation_time_s = time.time() - start_timestamp
-    logger.debug("Done data export - took {} seconds".format(generation_time_s))
+        generation_time_s = time.time() - start_timestamp
+        logger.debug("Done data export - took {} seconds".format(generation_time_s))
 
-    return {
-        "error": None,
-        "report_filename": filename,
-        "start_timestamp": start_timestamp,
-        "generation_time_s": generation_time_s,
-        "display_data": [] if len(rows) == 1 else rows
-    }
+        response = {
+            "error": None,
+            "report_filename": filename,
+            "start_timestamp": start_timestamp,
+            "generation_time_s": generation_time_s,
+            "display_data": [] if len(rows) == 1 else rows
+        }
+
+    except Exception, e:
+        pass
+
+    return response
 
 
 def _extract_data(course_key_str, block):

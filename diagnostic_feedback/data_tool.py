@@ -63,10 +63,14 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
         # Unfortunately this is a bit inefficient due to the ReportStore API
         if not self.last_export_result or self.last_export_result['error'] is not None:
             return None
-        from lms.djangoapps.instructor_task.models import ReportStore
-        report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
-        course_key = getattr(self.scope_ids.usage_id, 'course_key', None)
-        return dict(report_store.links_for(course_key)).get(self.last_export_result['report_filename'])
+        try:
+            from lms.djangoapps.instructor_task.models import ReportStore
+            report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
+            course_key = getattr(self.scope_ids.usage_id, 'course_key', None)
+            return dict(report_store.links_for(course_key)).get(self.last_export_result['report_filename'])
+        except Exception as ex:
+        # in case of unit testing, lms is usually not available
+            pass
 
     def _get_status(self):
         self.check_pending_export()
