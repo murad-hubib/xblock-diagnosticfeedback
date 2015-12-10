@@ -32,7 +32,7 @@ function StudentQuiz(runtime, element) {
     // used as combination with some other selector, will be scoped to current XBlock instance (if required)
     // at their usage places
       finalResult = '.diagnostic-feedback .response_body',
-      studentViewFormSelector = ".diagnostic-feedback .student_view_form",
+      studentViewFormSelector = ".diagnostic-feedback.diagnostic-feedback-student",
       completedStepSelector = ".diagnostic-feedback .completed_step",
       nextActionSelector = '.diagnostic-feedback ul[role="menu"] a[href*="next"]',
       previousActionSelector = '.diagnostic-feedback ul[role="menu"] a[href*="previous"]',
@@ -154,7 +154,8 @@ function StudentQuiz(runtime, element) {
       //on every step change this method either save the data to the server or skip it.
       var currentStep = currentIndex + 1;
       var isLast = (newIndex == $(studentViewFormSecSelector, element).length - 1);
-      return saveOrSkip(isLast, currentStep);
+
+      return saveOrSkip(isLast, currentStep, currentIndex, newIndex);
 
     }
 
@@ -176,7 +177,7 @@ function StudentQuiz(runtime, element) {
     }
 
 
-    function saveOrSkip(isLast, currentStep) {
+    function saveOrSkip(isLast, currentStep, currentIndex, newIndex) {
       common.clearErrors();
 
       // if start over button is click just return and do nothing
@@ -190,6 +191,10 @@ function StudentQuiz(runtime, element) {
         return true;
 
       } else {
+        if (currentIndex > newIndex) {
+          // allow to move backwards without validate & save
+          return true;
+        }
         var selectedChoice = $(visibleAnswerChoice, element).find(selectedStudentChoice).val();
 
         if (selectedChoice != "" && selectedChoice != undefined) {

@@ -1,4 +1,5 @@
 import logging
+import json
 import copy
 from xblock.core import XBlock
 from xblock.fields import Scope, String, List, Integer, Dict
@@ -140,6 +141,42 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         # Try accessing block ID. If usage_id does not have it, return usage_id itself
         return unicode(getattr(usage_id, 'block_id', usage_id))
 
+    def get_question(self, question_id):
+        """
+        Return Question object for given question id
+        """
+        question = {}
+        for question in self.questions:
+            if question['id'] == question_id:
+                question = question
+                break
+
+        return question
+
+    def get_buzzfeed_answer(self, choices, student_choice):
+        """
+        Return buzzfeed quiz answer label from question choices using student choice
+        """
+        choice_name = ''
+        for choice in choices:
+            if choice['category_id'] == student_choice:
+                choice_name = choice['name']
+                break
+
+        return choice_name
+
+    def get_diagnostic_answer(self, choices, student_choice):
+        """
+        Return diagnostic quiz answer label from question choices using student choice
+        """
+        choice_name = ''
+        for choice in choices:
+            if str(choice['value']) == student_choice:
+                choice_name = choice['name']
+                break
+
+        return choice_name
+
     def student_view(self, context=None):
         """
         it will loads student view
@@ -241,19 +278,19 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                 if self.current_step < data['currentStep']:
                     self.current_step = data['currentStep']
 
-                if my_api:
-                    log.info("have my_api intance")
-                    # Also send to the submissions API:
-                    item_key = self.student_item_key
-                    item_key['item_id'] = data['question_id']
-                    my_api.create_submission(item_key, self.student_choices[data['question_id']])
-                else:
-                    log.info("not my_api intance")
-
                 # calculate feedback result if user answering last question
                 if data['isLast']:
                     student_result = self.get_result()
-
+                    if my_api:
+                        log.info("have sub_api instance")
+                        # Also send to the submissions API:
+                        item_key = self.student_item_key
+                        item_key['item_id'] = self.get_block_id()
+                        submission_data = self.create_submission_data()
+                        submission_data['final_result'] = student_result
+                        my_api.create_submission(item_key, json.dumps(submission_data))
+                    else:
+                        log.info("not sub_api intance")
                 response_message = self._("Your response is saved")
         except Exception as ex:
             success = False
@@ -277,3 +314,24 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         self.current_step = 0
 
         return {'success': success, 'msg': response_message}
+
+    def create_submission_data(self):
+        """
+        Return a complete submission data as quiz completed
+        """
+        submission = {}
+        for question in self.questions:
+            question_id = question['id']
+            question_data = self.get_question(question_id)
+            if self.quiz_type == self.BUZZFEED_QUIZ_VALUE:
+                question_answer = self.get_buzzfeed_answer(question_data['choices'], self.student_choices[question_id])
+            else:
+                question_answer = self.get_diagnostic_answer(question_data['choices'],
+                                                             self.student_choices[question_id])
+
+            submission[question_id] = {
+                'question_text': question['text'],
+                'answer': question_answer
+            }
+
+        return submission
