@@ -32,7 +32,7 @@ def export_data(course_id, source_block_id_str):
     rows = []
 
     header = ["Course ID", "Block ID", "Student ID"]
-    for order, question in enumerate(block.questions):
+    for order in range(len(block.questions)):
         header.append("Question {}".format(order + 1))
         header.append("Answer")
     header.append('Student Result')
@@ -85,7 +85,7 @@ def _extract_data(course_key_str, block):
         data = json.loads(submission['answer'])
 
         row = [course_key_str, block_id, submission['student_id']]
-        for order, question in enumerate(block.questions):
+        for question in block.questions:
             row.append(data.get(question['id'], '').get('question_text'))
             row.append(data.get(question['id'], '').get('answer'))
         row.append(data.get('final_result', ''))
