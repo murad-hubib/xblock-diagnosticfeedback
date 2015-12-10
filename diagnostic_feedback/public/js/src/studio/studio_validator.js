@@ -22,7 +22,6 @@ function CustomValidator(runtime, element, initData) {
   }
 
   validatorObj.validateMinMax = function (range) {
-    debugger
     // validate each range for
     // if any range having min_value > max_value
     // check if ranges values are int OR float
