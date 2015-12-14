@@ -8,10 +8,10 @@
     <select id="<%- block_id %>_question[<%- q_order %>]category[<%- c_order %>]"
             name="<%- block_id %>_question[<%- q_order %>]category[<%- c_order %>]"
             class="required result-choice" required>
-        <option value=""> -- Choose result --</option>
+        <option value=""><%- gettext('Choose result') %></option>
         <% _.each(resultChoicesOptions, function(choice) { %>
-        <option value="<%- choice.id %>" <% if(choice.id == choice.category_id) { %>
-                selected="selected" <% } %> ><%- choice.name %></option>
+        <option value="<%- choice.id %>" > <% if(choice.id == choice.category_id) { %>
+                selected="selected" <% } %><%- choice.name %></option>
         <% }); %>
     </select>
     <% } else { %>

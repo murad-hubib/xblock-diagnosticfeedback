@@ -55,10 +55,8 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
         res = self.save_diagnostic_step3()
         assert_equals(res['success'], True)
 
-        for i, question_data in enumerate(self._block.questions):
+        for question_data in self._block.questions:
             for _type, data in self._daignostic_answer.items():
-                if i == len(self._block.questions) - 1:
-                    data['isLast'] = "True"
                 if _type == 'missing_id':
                     data['question_id'] = ''
                 else:
@@ -71,6 +69,11 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                     assert_equals(res['success'], False)
                 elif _type == 'missing_step':
                     assert_equals(res['success'], False)
+                if _type == 'valid_data':
+                    if data['isLast'] == "True":
+                        assert_equals(res['success'], True)
+                    else:
+                        assert_equals(res['success'], True)
 
     def test_buzzfeed_answer(self):
 
@@ -86,10 +89,8 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
         res = self.save_buzzfeed_step3()
         assert_equals(res['success'], True)
 
-        for i, question_data in enumerate(self._block.questions):
+        for question_data in self._block.questions:
             for _type, data in self._buzzfeed_answer.items():
-                if i == len(self._block.questions) - 1:
-                    data['isLast'] = "True"
                 if _type == 'missing_id':
                     data['question_id'] = ''
                 else:
@@ -102,6 +103,11 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                     assert_equals(res['success'], False)
                 elif _type == 'missing_step':
                     assert_equals(res['success'], False)
+                elif _type == 'valid_data':
+                    if data['isLast'] == "True":
+                        assert_equals(res['success'], True)
+                    else:
+                        assert_equals(res['success'], True)
 
     def tearDown(self):
         self._block = None

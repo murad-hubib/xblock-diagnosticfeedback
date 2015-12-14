@@ -15,7 +15,7 @@
                             <ul class="list-input settings-list">
                                 <li class="field comp-setting-entry metadata_entry">
                                     <div class="wrapper-comp-setting">
-                                        <label for="title" class="label setting-label">{% trans "Quiz Title" %}</label>
+                                        <label for="{{block_id}}_title" class="label setting-label">{% trans "Quiz Title" %}</label>
                                         <input id="{{block_id}}_title" name="{{block_id}}_title" type="text" class="required field-data-control"
                                                required value="{{self.title}}">
                                     </div>
@@ -23,7 +23,7 @@
                                 <li class="field comp-setting-entry metadata_entry">
                                     <div class="wrapper-comp-setting">
                                         {% if not self.quiz_type %}
-                                        <label for="type" class="label setting-label">{% trans "Quiz Type" %}</label>
+                                        <label for="{{block_id}}_type" class="label setting-label">{% trans "Quiz Type" %}</label>
                                         <select id="{{block_id}}_type" name="{{block_id}}_type" class="required field-data-control" required>
                                             <option value="">{% trans "Select Type" %}</option>
                                             {% for t in self.types %}
@@ -43,7 +43,7 @@
                                 </li>
                                 <li class="field comp-setting-entry metadata_entry">
                                     <div class="wrapper-comp-setting">
-                                        <label for="description" class="label setting-label">{% trans "Description" %}</label>
+                                        <label for="{{block_id}}_description" class="label setting-label">{% trans "Description" %}</label>
                                         <textarea id="{{block_id}}_description" name="{{block_id}}_description" rows="5" cols="50"
                                                   class="required field-data-control custom-textarea" required>{{self.description}}</textarea>
                                     </div>
@@ -83,6 +83,9 @@
                         <h3>{% trans "Questions" %}</h3>
                         <section step="3">
                             <div class="questions_panel">
+                                <div class='accordion'>
+
+                               </div>
 
                                 <a href="#" class="add-new-question button button-new"
                                    title="Click to add a new Question">

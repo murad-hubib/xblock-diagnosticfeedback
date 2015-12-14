@@ -9,6 +9,13 @@
                 <%- name %>
             <% }%>
         </span>
+        ( <span class="sort-title-group">
+            <% if (!group) { %>
+                <%- DEFAULT_GROUP %>
+            <% } else { %>
+                 <%- group %>
+            <% }%>
+        </span> )
         <span class="action-button">
             <a href="#" data-tooltip="<%- gettext('Delete Category') %>" class="delete-category delete-button action-button">
                 <i class="icon fa fa-trash-o"></i>
@@ -19,19 +26,32 @@
     <div>
 
         <div class="category">
+            <input type="hidden" id="<%- block_id %>_category[order][<%- order %>]"
+                   name="<%- block_id %>_category[order][<%- order %>]"
+                   class="skip-validation" value="<%- order %>" />
+
             <input type="hidden" id="<%- block_id %>_category[id][<%- order %>]"
                    name="<%- block_id %>_category[id][<%- order %>]" class="skip-validation"
                    value="<%- id %>"/>
+
             <input placeholder="<%- gettext('Name') %>" type="text"
                    id="<%- block_id %>_category[name][<%- order %>]"
                    name="<%- block_id %>_category[name][<%- order %>]"
                    class="required sort-title-source" required value="<%- name %>"/>
+
             <input placeholder="<%- gettext('Image URL') %> (e.g. /static/img15.jpg)" type="text"
                    class="image-url"
                    id="<%- block_id %>_category[image][<%- order %>]"
                    name="<%- block_id %>_category[image][<%- order %>]" value="<%- image %>"/>
 
-            <input placeholder="<%- gettext('Notes for author; not shown to students') %>" class="internal-description"
+            <input type="text" placeholder="<%- gettext('Attach to a group') %>"
+                   id="<%- block_id %>_category[group][<%- order %>]"
+                   name="<%- block_id %>_category[group][<%- order %>]"
+                   class="group-auto-complete category-autocomplete"
+                   value="<%- group %>" />
+
+            <input placeholder="<%- gettext('Notes for author; not shown to students') %>"
+                   class="internal-description"
                    type="text"
                    id="<%- block_id %>_category[internal_description][<%- order %>]"
                    name="<%- block_id %>_category[internal_description][<%- order %>]"

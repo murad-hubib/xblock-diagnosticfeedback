@@ -11,6 +11,7 @@ from .helpers import MainHelper
 from .validators import Validator
 from .sub_api import my_api
 from .data_tool import ExportDataBlock
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 loader = ResourceLoader(__name__)
@@ -31,6 +32,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
     BUZZFEED_QUIZ_LABEL = _("BuzzFeed-style")
     DIAGNOSTIC_QUIZ_VALUE = "DG"
     DIAGNOSTIC_QUIZ_LABEL = _("Diagnostic-style")
+    DEFAULT_GROUP = _('Default Group')
 
     display_name = String(
         display_name=_("Diagnostic Feedback"),
@@ -90,6 +92,12 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         help=_("List of results")
     )
 
+    groups = List(
+        default=[DEFAULT_GROUP],
+        scope=Scope.content,
+        help=_("List of results")
+    )
+
     current_step = Integer(
         default=0,
         scope=Scope.user_state,
@@ -99,6 +107,14 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
     @property
     def display_name_with_default(self):
         return self.title
+
+    @property
+    def additional_publish_event_data(self):
+        return {
+            'user_id': self.scope_ids.user_id,
+            'block_id': self.get_block_id(),
+            'component_id': self.scope_ids.usage_id
+        }
 
     def get_fragment(self, context, view='studio', json_args=None):
         """
@@ -199,7 +215,23 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
             if len(self.questions) == self.current_step:
                 context['result'] = self.get_result()
 
-        return self.get_fragment(context, 'student')
+        return self.get_fragment(
+            context,
+            'student',
+            {
+                'quiz_type': self.quiz_type,
+                'quiz_title': self.title
+            }
+        )
+
+    def get_attached_groups(self):
+        # return already attached groups
+        groups = []
+        for r in self.results:
+            if r['group'] not in groups:
+                groups.append(r['group'])
+
+        return groups
 
     def studio_view(self, context):
         """
@@ -220,7 +252,10 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                 'results': self.results,
                 'BUZZFEED_QUIZ_VALUE': self.BUZZFEED_QUIZ_VALUE,
                 'DIAGNOSTIC_QUIZ_VALUE': self.DIAGNOSTIC_QUIZ_VALUE,
+                'DEFAULT_GROUP': self.DEFAULT_GROUP,
                 'questions': self.questions,
+                'groups': self.groups,
+                'attachedGroups': self.get_attached_groups(),
                 'categoryTpl': loader.load_unicode('templates/underscore/category.html'),
                 'rangeTpl': loader.load_unicode('templates/underscore/range.html'),
                 'questionTpl': loader.load_unicode('templates/underscore/question.html'),
@@ -273,14 +308,31 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         try:
             success, response_message = Validator.validate_student_answer(self, data)
             if success:
+                question_id = data['question_id']
+                question_data = self.get_question(question_id)
+                if self.quiz_type == self.BUZZFEED_QUIZ_VALUE:
+                    question_answer = self.get_buzzfeed_answer(question_data['choices'], data['student_choice'])
+                else:
+                    question_answer = self.get_diagnostic_answer(question_data['choices'], data['student_choice'])
+
+                event_data = {
+                    'question_id': question_id,
+                    'question_title': question_data['title'],
+                    'question_text': question_data['text'],
+                    'answer': question_answer,
+                    'time': datetime.now()
+                }
+
                 # save student answer
-                self.student_choices[data['question_id']] = data['student_choice']
+                self.student_choices[question_id] = data['student_choice']
                 if self.current_step < data['currentStep']:
                     self.current_step = data['currentStep']
 
+                self.runtime.publish(self, 'xblock.diagnostic_feedback.question.submitted', event_data)
                 # calculate feedback result if user answering last question
                 if data['isLast']:
                     student_result = self.get_result()
+
                     if my_api:
                         log.info("have sub_api instance")
                         # Also send to the submissions API:
@@ -291,6 +343,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                         my_api.create_submission(item_key, json.dumps(submission_data))
                     else:
                         log.info("not sub_api intance")
+
                 response_message = self._("Your response is saved")
         except Exception as ex:
             success = False
@@ -314,6 +367,42 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         self.current_step = 0
 
         return {'success': success, 'msg': response_message}
+
+    @XBlock.json_handler
+    def get_groups(self, data, suffix=''):
+        """
+        Return list of group starting with a search term
+        """
+        groups = [s for s in filter(lambda x: x.lower().startswith(data.get('term', '').lower()), self.groups)]
+        return groups
+
+    @XBlock.json_handler
+    def add_group(self, data, suffix=''):
+        """
+        Add new group in self.groups list
+        """
+        success = True
+        grp_name = data.get('name', '')
+        if grp_name not in self.groups:
+            msg = self._('Group added successfully.')
+            self.groups.append(grp_name)
+
+        else:
+            msg = self._('Group already exist.')
+            success = False
+
+        return {'success': success, 'msg': msg, 'grp_name': grp_name}
+
+    @XBlock.json_handler
+    def publish_event(self, data, suffix=''):
+        """
+        Publish data for analytics purposes
+        """
+        event_type = data.pop('event_type')
+        data['time'] = datetime.now()
+
+        self.runtime.publish(self, event_type, data)
+        return {'result': 'ok'}
 
     def create_submission_data(self):
         """
