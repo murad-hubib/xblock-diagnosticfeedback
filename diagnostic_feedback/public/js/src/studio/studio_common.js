@@ -10,8 +10,11 @@ function StudioCommon(runtime, element, initData) {
     };
   }
 
+
   var commonObj = this,
     setting = new Setting(),
+    allGroups = initData.groups,
+    attachedGroups = initData.attachedGroups,
 
     // selector' to scope elements for the current XBlock instance, to
     // differentiate multiple diagnostic feedback blocks on one page
@@ -26,26 +29,30 @@ function StudioCommon(runtime, element, initData) {
     quizTypeInputSelector = '.diagnostic-feedback input[name*="type"]',
     quizDescriptionSelector = '.diagnostic-feedback textarea[name*="description"]',
     accordionSelector = '.accordion',
+    grpAutoCompleteSelector = ".group-auto-complete",
+    questionGroupFieldSelector = '.question-group',
+    addNewGroupBtn = '.add-new-group',
 
     sortTitleSelector = '.sort-title',
+    sortTitleGrpSelector = '.sort-title-group',
     sortTitleSrcSelector = '.sort-title-source',
 
     accordionGrpSelector = ".group",
 
     editQuestionPanel = ".diagnostic-feedback .edit_questionnaire_panel",
+    wizardContentSelector = editQuestionPanel + " .content",
     questionPanelSelector = '.diagnostic-feedback .questions_panel',
     questionSelector = '.question',
-    questionOrderSelector = '.q-order',
     questionIdSelector = '.question-id',
     questionFieldsContainerSelector = '.question-field',
     questionTxtFieldSelector = '.question-txt',
     questionTitleFieldSelector = '.question-title',
-    addQuestionSelector = '.add-new-question',
+    questionOrderSelector = ".question-order",
+    questionOrderFieldSelector = ".question-order-field",
 
     categoriesPanel = ".diagnostic-feedback .categories_panel",
     categorySelector = '.category',
     categoryIdSelector = 'input[name*="category[id]"]',
-    categoryNameSelector = "input[name*='category[name]']",
     categoryOrderSelector = ".category-order",
     categoryOrderFieldSelector = "input[name*='category[order]']",
     tinyMceTextarea = '.custom-textarea',
@@ -56,11 +63,14 @@ function StudioCommon(runtime, element, initData) {
     rangeOrderFieldSelector = "input[name*='range[order]']",
 
     allChoiceValuesInputs = '.diagnostic-feedback .answer-choice .answer-value',
+    choiceSelector = '.answer-choice',
     allResultChoicesDropdowns = '.diagnostic-feedback .answer-choice .result-choice',
+    questionResultChoicesDropdowns = '.answer-choice .result-choice',
+    allGroupChoicesDropdowns = '.diagnostic-feedback .question-group',
     choiceValueSelector = 'input[name*="]value["]',
     choiceValueClsSelector = '.answer-value',
     choiceNameSelector = 'input[name*=answer]',
-    choiceResultSelector = '.result-choice:visible',
+    choiceResultSelector = '.result-choice',
     allResultChoiceSelector = '.diagnostic-feedback .result-choice',
     choiceNameClsSelector = '.answer-txt';
 
@@ -110,27 +120,34 @@ function StudioCommon(runtime, element, initData) {
     var _input = $(eventObject.currentTarget),
       inputVal = $(_input).val() === '' ? gettext("Untitled") : $(_input).val();
 
-    $(_input).parents(accordionGrpSelector).find(sortTitleSelector)
-      .html(inputVal)
+    $(_input).parents(accordionGrpSelector).find(sortTitleSelector).html(inputVal);
   };
 
   commonObj.bindSortTitleSources = function(){
-    $.each($(editQuestionPanel, element).find(sortTitleSrcSelector), function(){
+    $.each($(editQuestionPanel, element).find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector), function(){
       $(this).unbind('keyup');
       $(this).bind('keyup', commonObj.updateResultSortTitle);
     });
-  }
+  };
+
+  commonObj.bindSortTitleSource = function(container){
+    container.find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector).bind('keyup', commonObj.updateResultSortTitle);
+  };
 
   commonObj.getAllWQuestionsChoices = function () {
-    // return array of array for all choices values of all questions
+    // return array of array for all choices values of all questions (per group)
 
-    var questionsChoices = [];
+    var questionsChoices = {};
     $.each($(questionPanelSelector + ' ' + questionSelector), function (i, question) {
+      var qGroup = $(question).find(questionGroupFieldSelector).val();
+      if(!(qGroup in questionsChoices)){
+        questionsChoices[qGroup] = [];
+      }
       var choices = [];
       $.each($(question).find(choiceValueSelector), function (j, choice) {
         choices.push(parseFloat($(choice).val()));
       });
-      questionsChoices.push(choices);
+      questionsChoices[qGroup].push(choices);
     });
     return questionsChoices;
   };
@@ -175,28 +192,90 @@ function StudioCommon(runtime, element, initData) {
     return combinations;
   };
 
-  commonObj.getChoicesList = function () {
-    // Get array of values for categories added at step2
-    
-    var categories = [];
-    $.each($(categoriesPanel, element).find(categorySelector), function (i, category) {
-      var id = $(category).find(categoryIdSelector).val();
-      var name = $(category).find(categoryNameSelector).val();
-      if(name !== "") {
-        categories.push({id: id, name: name});
+  commonObj.getGroups = function(request, response){
+    var groupHandlerUrl = runtime.handlerUrl(element, 'get_groups');
+
+    $.ajax({
+        type: "POST",
+        url: groupHandlerUrl,
+        data: JSON.stringify({term: request.term}),
+        success: function(data) {
+          response(data);
+        },
+        error: function(response) {
+            console.log(response);
+        }
+      });
+  };
+
+  commonObj.termInStrArray = function(term, _array){
+    // check if a string exists in array of strings
+    var isInArray = false;
+    $.each(_array, function(i, value){
+      if(term.trim().toLowerCase() == value.trim().toLowerCase()){
+        isInArray = true;
+        return false;
       }
     });
-    return categories;
+    return isInArray;
+  };
+
+  commonObj.parseAutoCompleteResponse = function(event, ui){
+    // show add new group button if no results found for a search term
+    var $field = $(event.target);
+    var term = $field.val(),
+      sortGrpTitle = term,
+      termInGroups = commonObj.termInStrArray(term, allGroups);
+
+    //update accordion heading for new/existing group name
+    if(!termInGroups){
+      sortGrpTitle = initData.DEFAULT_GROUP;
+    }
+    commonObj.updateSortingGroupTxt($field, sortGrpTitle);
+
+    $field.next(addNewGroupBtn).remove();
+    if((ui.content.length === 0 && term.trim() != '') || !(termInGroups)){
+      $field.after('<div class="custom-tooltip add-new-group">' +
+        '<a href="#" title="'+gettext('Create and attach new group')+'">' +
+        '<i class="icon fa fa-plus"></i></a></div>');
+    }
+
+  };
+
+  commonObj.updateSortingGroupTxt = function(el, txt){
+    // update text for group in accordion header
+    if(el.hasClass('question-group')){
+      el.parent().parent().parent().parent().find(sortTitleGrpSelector).text(txt);
+    } else {
+      el.parent().parent().parent().find(sortTitleGrpSelector).text(txt);
+    }
+  };
+
+  commonObj.autoCompleteOnSelect = function(event, ui){
+    // update text for group in accordion header on item select
+    var $field = $(event.target);
+    $field.next(addNewGroupBtn).remove();
+    commonObj.updateSortingGroupTxt($(event.target), ui.item.value);
+  };
+
+  commonObj.bindGroupAutoComplete = function(container){
+    // bind autocomplete with all required elements in a provided container
+    var elements = typeof container !== 'undefined' ? container.find(grpAutoCompleteSelector) :
+      $(grpAutoCompleteSelector, element);
+
+    elements.autocomplete({
+      appendTo: wizardContentSelector,
+      source: commonObj.getGroups,
+      select: commonObj.autoCompleteOnSelect,
+      response: commonObj.parseAutoCompleteResponse
+    });
   };
 
   commonObj.destroyAllEditors = function(container){
     // destory all editors instances in a specific container
     var editors = container.find(tinyMceTextarea);
     $.each(editors, function(i, editor){
-      if ($(editor).tinymce()) {
-        //remove existing attached instances
-        $(editor).tinymce().destroy();
-      }
+      commonObj.destroyEditor(editor);
     });
   };
 
@@ -220,7 +299,6 @@ function StudioCommon(runtime, element, initData) {
         if (destroyExisting) {
           commonObj.destroyEditor(textarea);
         }
-
         // initialize tinymce on a textarea
         $(textarea).tinymce({
           theme: 'modern',
@@ -259,45 +337,105 @@ function StudioCommon(runtime, element, initData) {
     return data;
   };
 
-  commonObj.updateAllResultDropwdowns = function (categories) {
+  commonObj.updateAllResultDropwdowns = function (groupDropDown, categories) {
     // update html of all results dropdowns to sync with categories added at step2
-    var dropDowns = $(allResultChoicesDropdowns, element);
+    var dropDowns = groupDropDown.parent().nextAll('ol').find(questionResultChoicesDropdowns);
     $.each(dropDowns, function (i, dropdown) {
+      var selectedValue = $(dropdown).val();
       var mappingOptions = commonObj.generateResultsHtml($(dropdown), categories);
       $(dropdown).html(mappingOptions);
+      $(dropdown).val(selectedValue);
+    });
+  };
+
+  commonObj.updateAutoCompleteSource = function(group){
+    // add new group to autocomplete source data and
+    allGroups.push(group);
+  };
+
+  commonObj.getOptionsList = function (dropdown){
+    return $(dropdown).find('option').map(function() {
+      var _value = $(this).val();
+      if(_value != "") { return $(this).val(); }
+    }).get()
+  };
+
+  commonObj.updateAllGroupDropwdowns = function () {
+    // update html of all group dropdowns to sync with groups added at step2
+
+    var dropDowns = $(allGroupChoicesDropdowns, element);
+    $.each(dropDowns, function (i, dropdown) {
+      var selectedValue = $(dropdown).val();
+      var groupOptions = commonObj.generateGroupsHtml($(dropdown), attachedGroups);
+      $(dropdown).html(groupOptions);
+
+      var options = commonObj.getOptionsList(dropdown);
+      if(options.indexOf(selectedValue) < 0){
+        selectedValue = "";
+      }
+
+      $(dropdown).val(selectedValue);
+      commonObj.updateSortingGroupTxt($(dropdown), selectedValue);
+
+      if(initData.BUZZFEED_QUIZ_VALUE){
+        var selectedGroup = $(dropdown).val(),
+          categories = commonObj.getGroupCategories(selectedGroup);
+        commonObj.updateAllResultDropwdowns($(dropdown), categories);
+    }
     });
   };
 
   commonObj.generateResultsHtml = function (dropdown, categories) {
-    // generate html of result dropdown at step3
+    // generate html of result dropdowns at step3
 
-    // get all existing values in dropdown
-    var existingValues = [];
-    $.each(dropdown.find('option'), function (i, option) {
-      existingValues.push($(option).val());
-    });
+    //remove previously added elements to prevent duplication
+    dropdown.find('option[value!=""]').remove();
 
-    // skip already added categories and append only newly added category/categories as result
+    // Append newly added category/categories as result
     var _html = '';
     $.each(categories, function (i, category) {
-      var id = category.id;
-      var name = category.name;
+      var id = category.id,
+        name = category.name;
 
-      if (existingValues.indexOf(id) < 0) {
-        //append if option not exist
         _html += "<option value='" + id + "'>" + name + "</option>";
-      } else {
-        //just update label of exiting option
-        dropdown.find('option[value="' + id + '"]').html(name);
-      }
     });
 
     return dropdown.html() + _html;
   };
 
+  commonObj.generateGroupsHtml = function (dropdown, groups) {
+    // generate html of group dropdowns at step3
+
+
+    //remove previously added elements to prevent duplication
+    dropdown.find('option[value!=""]').remove();
+
+    // Append newly added group/groups as result
+    var _html = '';
+    $.each(groups, function (i, group) {
+
+        _html += "<option value='" + group + "'>" + group + "</option>";
+    });
+
+    return dropdown.html() + _html;
+  };
+
+  commonObj.updateAttachedGroups = function(results) {
+    // update value of attachedGroups by iterating over results added at step2
+
+    var groups = [];
+    $.each(results, function(i, result){
+      if(groups.indexOf(result.group) < 0){
+        groups.push(result.group);
+      }
+    });
+
+    attachedGroups = groups;
+  };
+
   commonObj.updateNextForm = function (step, previousStepData) {
     // Manipulate DOM of next step in wizard, based on the last step selections
-    
+
     var quizType = commonObj.getQuizType();
     if (step == 1) {
       // for 2nd step of wizard
@@ -321,27 +459,32 @@ function StudioCommon(runtime, element, initData) {
       }
     } else if (step == 2) {
       // for 3rd step of wizard
+      var results = [];
       if (quizType == 'BFQ') {
         // in case quiz type is Buzzfeed
         // fill all results dropdown with categories selected at step 2
         // hide range related inputs and show result dropdowns
-        var categories = previousStepData['categories'];
-        commonObj.updateAllResultDropwdowns(categories);
+        results = previousStepData['categories'];
         $(allChoiceValuesInputs, element).hide();
         $(allResultChoicesDropdowns, element).show();
 
       } else {
+
         // in case quiz type is diagnostic
         // hide all results dropdowns and sow range related inputs
+        results = previousStepData['ranges'];
         $(allResultChoicesDropdowns, element).hide();
         $(allChoiceValuesInputs, element).show();
       }
+      commonObj.updateAttachedGroups(results);
+      commonObj.updateAllGroupDropwdowns();
       commonObj.initiateHtmlEditor($(questionPanelSelector, element), true);
     }
   };
 
   commonObj.updateFieldAttr = function (field, order) {
     // update the name/id of a single category/range filed
+
     var previousName = field.attr('name').split("][")[0];
     var newName = previousName + "][" + order + "]";
     field.attr({name: newName, id: newName});
@@ -350,10 +493,11 @@ function StudioCommon(runtime, element, initData) {
   commonObj.updateQuestionFieldAttr = function (question, i) {
     //Update name/id attributes of a given question-txt field
 
-    $(question).find(questionOrderSelector).html(i + 1);
     var questionTitle = initData.block_id + '_question[' + i + '][title]';
+    var questionGroup = initData.block_id + '_question[' + i + '][group]';
     var questionText = initData.block_id + '_question[' + i + '][text]';
     $(question).find(questionTitleFieldSelector).first().attr({'name': questionTitle, id: questionTitle});
+    $(question).find(questionGroupFieldSelector).first().attr({'name': questionGroup, id: questionGroup});
     $(question).find(questionTxtFieldSelector).first().attr({'name': questionText, id: questionText});
   };
 
@@ -382,6 +526,41 @@ function StudioCommon(runtime, element, initData) {
     });
   };
 
+  commonObj.getGroupCategories = function(groupName){
+    // return all categories with in a group
+
+    var allCategories = commonObj.getCategoriesList('category[name]');
+    if (!groupName) {
+      return allCategories;
+    }
+
+    var groupCategories = [];
+    $.each(allCategories, function(i, category){
+      if(category.group === groupName){
+        groupCategories.push(category)
+      }
+    });
+    return groupCategories;
+  };
+
+
+  commonObj.getGroupRanges = function(groupName){
+    // return all categories with in a group
+
+    var allRanges = commonObj.getRangesList('range[name]');
+    if (!groupName) {
+      return allRanges;
+    }
+
+    var groupRangs = [];
+    $.each(allRanges, function(i, range){
+      if(range.group === groupName){
+        groupRangs.push(range)
+      }
+    });
+    return groupRangs;
+  };
+
   commonObj.getCategoriesList = function (fieldName) {
     // Get list of categories at step2
     return $('input[name*="' + fieldName + '"]', element).map(function () {
@@ -393,31 +572,36 @@ function StudioCommon(runtime, element, initData) {
         $('input[name*="category[id][' + order + ']"]', element).val(id);
       }
 
-      var name = this.value,
+      var group = $('input[name*="category[group][' + order + ']"]', element).val(),
+        name = this.value,
         catOrder = $('input[name*="category[order][' + order + ']"]', element).val(),
         image = $('input[name*="category[image][' + order + ']"]', element).val(),
-        internalDescription = $('input[name*="category[internal_description][' + order + ']"]', element).val(),
+
+        internalDescription = $('input[name*="category[internal_description][' + order + ']"]').val(),
         htmlBody = $('textarea[name*="category[html_body][' + order + ']"]', element).val();
 
-      return {id: id, name: name, order: catOrder,  image: image, internal_description: internalDescription,
-        html_body: htmlBody};
+      group = commonObj.termInStrArray(group, allGroups) ? group.trim() : initData.DEFAULT_GROUP;
+      return {id: id, name: name, order: catOrder,  image: image, group: group,
+        internal_description: internalDescription, html_body: htmlBody};
     }).get();
   };
 
   commonObj.getRangesList = function (fieldName) {
     // Get list of ranges at step2
     return $('input[name*="' + fieldName + '"]', element).map(function () {
+
       var order = $(this).attr('name').split('][')[1].replace(']', ''),
+        group = $('input[name*="range[group][' + order + ']"]', element).val(),
         name = this.value,
         rangeOrder = $('input[name*="range[order][' + order + ']"]', element).val(),
         minValue = $('input[name*="range[min][' + order + ']"]', element).val(),
         maxValue = $('input[name*="range[max][' + order + ']"]', element).val(),
         image = $('input[name*="range[image][' + order + ']"]', element).val(),
-        internalDescription = $('input[name*="range[internal_description][' + order + ']"]', element).val(),
+        internalDescription = $('input[name="range[internal_description][' + order + ']"]', element).val(),
         htmlBody = $('textarea[name*="range[html_body][' + order + ']"]', element).val();
-
+      group = commonObj.termInStrArray(group, allGroups) ? group.trim() : initData.DEFAULT_GROUP;
       return {
-        name: name, order: rangeOrder, min_value: minValue, max_value: maxValue, image: image,
+        name: name, order: rangeOrder, min_value: minValue, max_value: maxValue, image: image, group: group,
         internal_description: internalDescription, html_body: htmlBody
       };
     }).get();
@@ -456,8 +640,12 @@ function StudioCommon(runtime, element, initData) {
     var questionContainers = $(questionPanelSelector + " " + questionSelector);
     var questions = [];
     $.each(questionContainers, function (i, container) {
+      var group = $(container).find(questionGroupFieldSelector).val();
+
       var questionObj = {
+        order: $(container).find(questionOrderFieldSelector).val(),
         question_title: $(container).find(questionTitleFieldSelector).val(),
+        group: group != "" ? group.trim() : initData.DEFAULT_GROUP,
         question_txt: $(container).find(questionTxtFieldSelector).val(),
         choices: []
       };
@@ -468,7 +656,6 @@ function StudioCommon(runtime, element, initData) {
         $(container).find(questionIdSelector).first().val(id);
       }
       questionObj['id'] = id;
-
       var answerChoicesInputs = $(container).find(choiceNameClsSelector);
       $.each(answerChoicesInputs, function (j, choice) {
         var answerChoice = {
@@ -505,7 +692,7 @@ function StudioCommon(runtime, element, initData) {
     });
 
     // Re-attach text editor after field renaming
-    commonObj.initiateHtmlEditor($(categoriesPanel));
+    commonObj.initiateHtmlEditor($(categoriesPanel, element));
   };
 
   commonObj.processRanges = function(rangesContainer){
@@ -524,7 +711,26 @@ function StudioCommon(runtime, element, initData) {
     });
 
     // re-attach text editor after field renaming
-    commonObj.initiateHtmlEditor($(rangesPanel));
+    commonObj.initiateHtmlEditor($(rangesPanel, element));
+  };
+
+  commonObj.processQuestions = function(questionsContainer){
+    // rename all remaining question fields including its choice
+    var remainingQuestions = questionsContainer.find(questionSelector);
+    $.each(remainingQuestions, function (i, question) {
+      $(question).parent().prev().find(questionOrderSelector).html(i + 1);
+      $(question).find(questionOrderFieldSelector).val(i);
+
+      // rename all questions & choices fields after deletion of a question
+      commonObj.updateQuestionFieldAttr(question, i);
+      var questionChoices = $(question).find(choiceSelector);
+      $.each(questionChoices, function (j, choice) {
+        commonObj.updateChoiceFieldAttr(choice, j);
+      });
+    });
+
+    // Re-attach tinymce after fields renaming
+    commonObj.initiateHtmlEditor($(questionPanelSelector, element));
   };
 
   commonObj.createAccordion = function(_id, type) {
@@ -547,10 +753,14 @@ function StudioCommon(runtime, element, initData) {
             var categoriesContainer = $(categoriesPanel);
             commonObj.destroyAllEditors(categoriesContainer);
             commonObj.processCategories(categoriesContainer);
-          } else {
+          } else if (type == "ranges") {
             var rangesContainer = $(rangesPanel);
             commonObj.destroyAllEditors(rangesContainer);
             commonObj.processRanges(rangesContainer);
+          } else {
+            var questionsContainer = $(questionPanelSelector);
+            commonObj.destroyAllEditors(questionsContainer);
+            commonObj.processQuestions(questionsContainer);
           }
         }
       });
@@ -566,9 +776,9 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.renderSingleCategory = function (order, category) {
     //Render html for a single category
-    
+
     if (typeof category == 'undefined') {
-      category = {id: '', name: '', image: '', internal_description: '', html_body: ''};
+      category = {id: '', name: '', image: '', group: '', internal_description: '', html_body: ''};
     }
 
     if (typeof category.id == 'undefined') {
@@ -576,6 +786,7 @@ function StudioCommon(runtime, element, initData) {
     }
 
     category['order'] = order;
+    category['DEFAULT_GROUP'] = initData.DEFAULT_GROUP;
     category['block_id'] = initData.block_id;
 
     var tpl = _.template(initData.categoryTpl),
@@ -588,10 +799,11 @@ function StudioCommon(runtime, element, initData) {
     //Render html for a single range
 
     if (typeof range == 'undefined') {
-      range = {name: '', min_value: '', max_value: '', image: '', internal_description: '', html_body: ''};
+      range = {name: '', min_value: '', max_value: '', image: '', group: '', internal_description: '', html_body: ''};
     }
 
     range['order'] = order;
+    range['DEFAULT_GROUP'] = initData.DEFAULT_GROUP;
     range['block_id'] = initData.block_id;
 
     var tpl = _.template(initData.rangeTpl),
@@ -601,11 +813,12 @@ function StudioCommon(runtime, element, initData) {
   };
 
 
-  commonObj.renderSingleChoice = function (qOrder, cOrder, choice, returnChoiceObj) {
+  commonObj.renderSingleChoice = function (qOrder, cOrder, choice, returnChoiceObj, group) {
     //Render html for a single choice
 
     var quizType = commonObj.getQuizType();
     var returnChoiceObj = typeof returnChoiceObj !== 'undefined' ? returnChoiceObj : false;
+    var group = typeof group !== 'undefined' ? group : initData.DEFAULT_GROUP;
 
     if (typeof choice == 'undefined') {
       choice = {name: '', value: '', category_id: ''};
@@ -614,7 +827,7 @@ function StudioCommon(runtime, element, initData) {
     choice['q_order'] = qOrder;
     choice['block_id'] = initData.block_id;
     choice['c_order'] = cOrder;
-    choice['resultChoicesOptions'] = commonObj.getChoicesList();
+    choice['resultChoicesOptions'] = commonObj.getGroupCategories(group);
     choice['quiz_type'] = quizType;
     choice['BUZZFEED_QUIZ_VALUE'] = initData.BUZZFEED_QUIZ_VALUE;
     choice['DIAGNOSTIC_QUIZ_VALUE'] = initData.DIAGNOSTIC_QUIZ_VALUE;
@@ -636,12 +849,15 @@ function StudioCommon(runtime, element, initData) {
         id: '',
         title: '',
         text: '',
+        group: '',
         choices: []
       }
     }
 
     question['order'] = order;
     question['block_id'] = initData.block_id;
+    question['DEFAULT_GROUP'] = initData.DEFAULT_GROUP;
+    question['allGroups'] = attachedGroups;
 
     // Render if questiong already have choices
     if (question.choices.length > 0) {
@@ -659,7 +875,7 @@ function StudioCommon(runtime, element, initData) {
     var tpl = _.template(initData.questionTpl),
       html = tpl(question);
 
-    $(html).insertBefore($(questionPanelSelector).find(addQuestionSelector));
+    $(questionPanelSelector).find(accordionSelector).append(html);
   };
 
   commonObj.renderCategories = function () {

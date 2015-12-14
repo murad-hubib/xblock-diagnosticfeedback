@@ -1,5 +1,6 @@
 function Quiz(runtime, element, initData) {
   // contain js related to studio quiz wizard
+
   // import related js helpers
   var customValidator = new CustomValidator(runtime, element, initData),
     common = new Common(runtime, element, initData),
@@ -32,9 +33,12 @@ function Quiz(runtime, element, initData) {
 
       categoriesPanel = '.diagnostic-feedback .categories_panel',
       addNewCategoryBtn = categoriesPanel + ' .add-new-category',
+      addNewGroupBtn = '.add-new-group',
       deleteCategoryBtn = '.delete-category',
       categorySelector = '.category',
       editorSelector = '.custom-textarea',
+      questionGrpSelector = '.question-group',
+      grpError = 'group-error',
 
       accordionSelector = '.accordion',
       accordionGrpSelector = ".group",
@@ -75,7 +79,10 @@ function Quiz(runtime, element, initData) {
         studioCommon.renderRanges();
         studioCommon.createAccordion(rangesPanel+ " " + accordionSelector, 'ranges');
       }
+
       studioCommon.renderQuestions();
+      studioCommon.createAccordion(questionPanel+ " " + accordionSelector, 'questions');
+
     }
 
     //initialize js validations if on in setting.js
@@ -91,7 +98,7 @@ function Quiz(runtime, element, initData) {
 
           var groups = $(element).parents('.group');
           if(groups.length > 0){
-            groups.removeClass('group-error');
+            groups.removeClass(grpError);
           }
         },
         errorPlacement: function errorPlacement(error, element) {
@@ -106,7 +113,7 @@ function Quiz(runtime, element, initData) {
 
           var groups = element.parents('.group');
           if(groups.length > 0){
-            groups.addClass('group-error');
+            groups.addClass(grpError);
           }
 
           error.wrap(container);
@@ -141,7 +148,7 @@ function Quiz(runtime, element, initData) {
 
           //close modal window if step3 saved successfully
           if (response.step == 3) {
-            if (showInvalidChoiceValueWarning) {
+            if (showInvalidChoiceValueWarning.showWarning) {
               common.showMessage({
                 success: false,
                 warning: true,
@@ -149,12 +156,13 @@ function Quiz(runtime, element, initData) {
                 msg: '<br />' +
                 gettext('Your data has been successfully saved.') +
                 '<br />' +
-                gettext('However, some answer combinations may not belong to any result.') +
+                gettext('However, some answer combinations in "' + showInvalidChoiceValueWarning. warningGroup +
+                  '" may not belong to any result in that group.') +
                 '<a class="close_msg" href="#" style="float: right">' +
                 gettext('Close') +
                 '</a>'
               });
-              showInvalidChoiceValueWarning = false;
+              showInvalidChoiceValueWarning.showWarning = false;
             } else {
               studioCommon.closeModal(runtime.modal);
             }
@@ -173,14 +181,15 @@ function Quiz(runtime, element, initData) {
       // if return true next stepp will be loaded
       // if return false validation errors will be shown
 
+     // generic validation rules
      var fieldToIgnore = [
-         'section:visible .skip-validation',
-         'section:hidden input',
-         'section:hidden textarea',
-         'section:hidden select'
-       ],
-        quizType = studioCommon.getQuizType(),
-        customValidated = false;
+       'section:visible .skip-validation',
+       'section:hidden input',
+       'section:hidden textarea',
+       'section:hidden select'
+     ],
+     quizType = studioCommon.getQuizType(),
+     customValidated = false;
 
       tinyMCE.triggerSave();
 
@@ -195,23 +204,34 @@ function Quiz(runtime, element, initData) {
         if (setting.jsValidation) {
           //ignore hidden fields; will validate on current step showing fields
           if (currentStep == 2 ) {
-              if (quizType == initData.BUZZFEED_QUIZ_VALUE){
-                  fieldToIgnore = fieldToIgnore.concat([
-                      'section:visible .ranges_panel input:hidden',
-                      'section:visible .ranges_panel select:hidden'
-                  ]);
-              } else {
-                  fieldToIgnore = fieldToIgnore.concat([
-                      'section:visible .categories_panel input:hidden',
-                      'section:visible .categories_panel select:hidden'
-                  ]);
-              }
+            // add step-2 related validation rules
+            if (quizType == initData.BUZZFEED_QUIZ_VALUE){
+              // in buzzfeed-style quiz ignore diagnostic-style quiz (ranges) related fields
+              fieldToIgnore = fieldToIgnore.concat([
+                'section:visible .ranges_panel input:hidden',
+                'section:visible .ranges_panel select:hidden'
+              ]);
+            } else {
+              // in diagnostic-style quiz ignore buzzfeed-style quiz (categories) related fields
+              fieldToIgnore = fieldToIgnore.concat([
+                'section:visible .categories_panel input:hidden',
+                'section:visible .categories_panel select:hidden'
+              ]);
+            }
 
           } else {
+            // add step-3 related validation rules
+            if(quizType == initData.BUZZFEED_QUIZ_VALUE){
+              // in buzzfeed-style quiz ignore diagnostic-style quiz related fields
               fieldToIgnore = fieldToIgnore.concat([
-                  'section:visible input:hidden',
-                  'section:visible select:hidden'
+                'section:visible input.answer-value:hidden'
               ]);
+            }else {
+              // in diagnostic-style quiz ignore buzzfeed-style quiz related fields
+              fieldToIgnore = fieldToIgnore.concat([
+                'section:visible select.result-choice:hidden'
+              ]);
+            }
           }
           $form.validate().settings.ignore = fieldToIgnore.join(", ");
 
@@ -261,12 +281,14 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        existingCategories = link.prev().find(accordionGrpSelector).length;
+        existingCategories = link.prev().find(accordionGrpSelector).length,
+        categoriesPanelObj = $(categoriesPanel, element);
 
       studioCommon.renderSingleCategory(existingCategories);
-      studioCommon.initiateHtmlEditor($(categoriesPanel, element));
+      studioCommon.initiateHtmlEditor(categoriesPanelObj);
       studioCommon.refreshAccordion(categoriesPanel + " " + accordionSelector);
-      studioCommon.bindSortTitleSources();
+      studioCommon.bindSortTitleSource(categoriesPanelObj);
+      studioCommon.bindGroupAutoComplete(categoriesPanelObj);
     });
 
     $(addNewRangeBtn, element).click(function (eventObject) {
@@ -274,13 +296,60 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        existingRanges = link.prev().find(accordionGrpSelector).length;
+        existingRanges = link.prev().find(accordionGrpSelector).length,
+        rangesPanelObj = $(rangesPanel, element);
 
       studioCommon.renderSingleRange(existingRanges);
-      studioCommon.initiateHtmlEditor($(rangesPanel));
+      studioCommon.initiateHtmlEditor(rangesPanelObj);
       studioCommon.refreshAccordion(rangesPanel + " " + accordionSelector);
-      studioCommon.bindSortTitleSources();
+      studioCommon.bindSortTitleSource(rangesPanelObj);
+      studioCommon.bindGroupAutoComplete(rangesPanelObj);
     });
+
+    $(editQuestionPanel, element).on('click', addNewGroupBtn, function (eventObject) {
+      // Add new range template to page
+
+      eventObject.preventDefault();
+
+      var groupHandlerUrl = runtime.handlerUrl(element, 'add_group'),
+        el = $(eventObject.currentTarget),
+        field = el.prevAll('.group-auto-complete'),
+        name = field.val();
+
+      if (name){
+
+        $.ajax({
+          type: "POST",
+          url: groupHandlerUrl,
+          data: JSON.stringify({name: name}),
+          success: function(response) {
+            var success, warning;
+            if(response.success){
+              success = true;
+              warning = false;
+              studioCommon.updateAutoCompleteSource(response.grp_name);
+              studioCommon.updateSortingGroupTxt(el, response.grp_name);
+            } else {
+              success = true;
+              warning = false;
+            }
+            common.showMessage({
+              success: success,
+              warning: warning,
+              persist: false,
+              msg: response.msg
+            });
+
+            el.remove();
+
+          },
+          error: function(response) {
+              console.log(response);
+          }
+        });
+      }
+    });
+
 
     $(step3Panel, element).on('click', addNewQuestionBtn, function (eventObject) {
       // Add new question template to page
@@ -288,23 +357,24 @@ function Quiz(runtime, element, initData) {
       eventObject.preventDefault();
 
       var link = $(eventObject.currentTarget),
-        existingQuestions = link.prevAll(questionSelector).length;
+        existingQuestions = link.prev().find(accordionGrpSelector).length;
 
       studioCommon.renderSingleQuestion(existingQuestions);
       studioCommon.initiateHtmlEditor($(questionPanel, element));
-
+      studioCommon.refreshAccordion(questionPanel + " " + accordionSelector);
+      studioCommon.bindSortTitleSource($(questionPanel, element));
     });
 
     $(questionPanel, element).on('click', addNewChoiceBtn, function (eventObject) {
       // Add new choice html to question container
 
       eventObject.preventDefault();
-
       var link = $(eventObject.currentTarget),
-        existingQuestions = link.parent(questionSelector).prevAll(questionSelector).length,
+        group = link.parent(questionSelector).find(questionGrpSelector).val(),
+        existingQuestions = link.parents(accordionGrpSelector).prevAll(accordionGrpSelector).length,
         existingChoices = link.prev().find(choiceSelector).length;
 
-      var choiceHtml = studioCommon.renderSingleChoice(existingQuestions, existingChoices);
+      var choiceHtml = studioCommon.renderSingleChoice(existingQuestions, existingChoices, undefined, false, group);
 
       link.prev('ol').append(choiceHtml);
     });
@@ -322,8 +392,9 @@ function Quiz(runtime, element, initData) {
         common.showMessage({
           success: false,
           warning: true,
+          persist: true,
           msg: gettext('At least one category is required')
-        }, categoriesContainer.find(categorySelector));
+        }, categoriesContainer.find(accordionGrpSelector));
       } else {
         // ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this category?'))) {
@@ -359,8 +430,9 @@ function Quiz(runtime, element, initData) {
         common.showMessage({
           success: false,
           warning: true,
+          persist: true,
           msg: gettext('At least one range is required')
-        }, rangesContainer.find(rangeSelector));
+        }, rangesContainer.find(accordionGrpSelector));
       } else {
         // ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this range?'))) {
@@ -381,7 +453,6 @@ function Quiz(runtime, element, initData) {
     $(questionPanel, element).on('click', deleteQuestionBtn, function (eventObject) {
       // delete question
       eventObject.preventDefault();
-
       var btn = $(eventObject.currentTarget);
       var questionsContainer = $(btn).parents(questionPanel).first();
 
@@ -390,12 +461,13 @@ function Quiz(runtime, element, initData) {
         common.showMessage({
           success: false,
           warning: true,
+          persist: true,
           msg: gettext('At least one question is required')
-        }, questionsContainer.find(questionSelector));
+        }, questionsContainer.find(accordionGrpSelector));
       } else {
         //ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this question?'))) {
-          var question = $(btn).parents(questionSelector);
+          var question = $(btn).parents(accordionGrpSelector);
 
           // remove all tinymce binding before deleting question html
           studioCommon.destroyEditor($(question).find(editorSelector));
@@ -403,25 +475,21 @@ function Quiz(runtime, element, initData) {
           //remove question html from DOM
           question.remove();
 
-          // rename all remaining question fields including its choice
-          var remainingQuestions = questionsContainer.find(questionSelector);
-          $.each(remainingQuestions, function (i, question) {
+          // refresh accordion
+          studioCommon.refreshAccordion(questionPanel + " " + accordionSelector);
 
-            // remove all previous tinymce attachments
-            studioCommon.destroyEditor($(question).find(editorSelector));
-
-            // rename all questions & choices fields after deletion of a question
-            studioCommon.updateQuestionFieldAttr(question, i);
-            var questionChoices = $(question).find(choiceSelector);
-            $.each(questionChoices, function (j, choice) {
-              studioCommon.updateChoiceFieldAttr(choice, j);
-            });
-          });
-
-          // Re-attach tinymce after fields renaming
-          studioCommon.initiateHtmlEditor($(questionPanel, element));
+          // rename all remaining categories fields after deletion of a category
+          studioCommon.processQuestions(questionsContainer);
         }
       }
+    });
+
+    $(questionPanel, element).on('change', questionGrpSelector, function(eventObject){
+        eventObject.preventDefault();
+        var group = $(eventObject.target).val();
+        var grpCategories = studioCommon.getGroupCategories(group);
+        studioCommon.updateSortingGroupTxt($(eventObject.target), group);
+        studioCommon.updateAllResultDropwdowns($(eventObject.target), grpCategories);
     });
 
     $(questionPanel, element).on('click', deleteChoiceBtn, function (eventObject) {
@@ -454,12 +522,6 @@ function Quiz(runtime, element, initData) {
       }
     });
 
-    //$(questionPanel, element).on('change', 'select', function (eventObject) {
-    //  // add attribute selected='select' on selection option
-    //  var select = $(eventObject.currentTarget).find("option:selected");
-    //  select.attr({'selected': 'selected'});
-    //});
-
     $(editQuestionPanel, element).on('click', closeMsgBtnSelector, function (eventObject) {
       eventObject.preventDefault();
 
@@ -473,6 +535,7 @@ function Quiz(runtime, element, initData) {
     renderSteps();
     studioCommon.initiateHtmlEditor($step1Panel, true);
     studioCommon.bindSortTitleSources();
+    studioCommon.bindGroupAutoComplete();
 
     $('.action-cancel').click(function (eventObject) {
       // notify runtime that modal windows is going to close

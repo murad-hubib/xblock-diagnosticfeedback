@@ -5,7 +5,7 @@ function Common(runtime, element, initData) {
 
   var cObj = this,
   //selectors
-    warningMessage = '.diagnostic-feedback .validation-msg',
+    warningMessage = '.validation-msg',
     globalMessage = '.diagnostic-feedback .msg',
     visibleUserAnswer = '.diagnostic-feedback .user-answers:visible',
     validateErrors = '.diagnostic-feedback .validation-error-message';
@@ -52,8 +52,7 @@ function Common(runtime, element, initData) {
   cObj.showChildMessage = function (container, msgObj) {
     // append message to given container
     var _type = '';
-    var title = '';
-    container.find(warningMessage).remove();
+    $(container).find(warningMessage).remove();
 
     if (msgObj.success) {
       _type = 'success-msg';
@@ -83,4 +82,12 @@ function Common(runtime, element, initData) {
       cObj.showGlobalMessage(data);
     }
   };
+
+  cObj.publishEvent = function (data) {
+    $.ajax({
+      type: "POST",
+      url: runtime.handlerUrl(element, 'publish_event'),
+      data: JSON.stringify(data)
+    });
+    }
 }

@@ -18,25 +18,6 @@ class RangeValidator(BaseValidator):
         """
         return min and max and float(_min) >= float(_max)
 
-    def validate_via_arrays_comparisons(self, range1, range2):
-        """
-        first algorithm to test if two ranges are overlapping, using lists to find overlap
-        :param range1: first range
-        :param range2: second range
-        :return: Boolean
-        """
-
-        r1_min = range1.get('min_value')
-        r1_max = range1.get('max_value')
-        r2_min = range2.get('min_value')
-        r2_max = range2.get('max_value')
-        if r1_min and r1_max and r2_min and r2_max:
-            range1 = self.drange(float(r1_min), float(r1_max), 0.1)
-            range2 = self.drange(float(r2_min), float(r2_max), 0.1)
-            return bool(set(range1) & set(range2))
-        else:
-            return True
-
     def validate_via_simple_comparisons(self, range1, range2):
         """
         second algorithm to test if two ranges are overlapping, using basic min/max values comparisons
@@ -46,11 +27,13 @@ class RangeValidator(BaseValidator):
         """
         r1_min = range1.get('min_value')
         r1_max = range1.get('max_value')
+        r1_group = range1.get('group')
         r2_min = range2.get('min_value')
         r2_max = range2.get('max_value')
+        r2_group = range2.get('group')
         if r1_min and r1_max and r2_min and r2_max:
             # overlap = range1.min <= range2.max && range2.min <= range1.max;
-            overlap = bool(float(r1_min) <= float(r2_max) and float(r2_min) <= float(r1_max))
+            overlap = bool(r1_group == r2_group and float(r1_min) <= float(r2_max) and float(r2_min) <= float(r1_max))
             return overlap
         else:
             return True
@@ -68,6 +51,8 @@ class RangeValidator(BaseValidator):
             name = _range.get('name')
             min_value = _range.get('min_value')
             max_value = _range.get('max_value')
+            group = _range.get('group')
+            order = _range.get('order')
 
             if self.is_empty(name):
                 valid = False
@@ -78,7 +63,12 @@ class RangeValidator(BaseValidator):
             elif self.bigger_min_val(min_value, max_value):
                 valid = False
                 validation_message = self._('Min > Max')
-
+            elif self.is_empty(group):
+                valid = False
+                validation_message = self._('Group is required')
+            elif self.is_empty(order):
+                valid = False
+                validation_message = self._('Order is required')
             if not valid:
                 break
 
@@ -97,7 +87,8 @@ class RangeValidator(BaseValidator):
             for range2 in ranges[idx + 1: len(ranges) + 1]:
                 if self.validate_via_simple_comparisons(_range, range2):
                     valid = False
-                    validation_message = '{} [{} - {}] & [{} - {}]'.format(self._("Overlapping ranges"),
+                    validation_message = '{} [{} - {}] & [{} - {}]'.format(self._("Overlapping ranges in '{}'")
+                                                                           .format(_range.get('group')),
                                                                            _range.get('min_value'),
                                                                            _range.get('max_value'),
                                                                            range2.get('min_value'),

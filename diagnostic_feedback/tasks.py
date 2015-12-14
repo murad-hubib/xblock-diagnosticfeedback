@@ -31,11 +31,10 @@ def export_data(course_id, source_block_id_str):
     # Define the header row of our CSV:
     rows = []
 
-    header = ["Course ID", "Block ID", "Student ID"]
+    header = ["Course ID", "Block ID", "Student ID", "Quiz Title", "Final Result"]
     for order in range(len(block.questions)):
         header.append("Question {}".format(order + 1))
         header.append("Answer")
-    header.append('Student Result')
 
     rows.append(header)
 
@@ -84,11 +83,10 @@ def _extract_data(course_key_str, block):
     for submission in _get_submissions(course_key_str, block_type, block_id):
         data = json.loads(submission['answer'])
 
-        row = [course_key_str, block_id, submission['student_id']]
+        row = [course_key_str, block_id, submission['student_id'], block.title, data.get('final_result', '')]
         for question in block.questions:
             row.append(data.get(question['id'], '').get('question_text'))
             row.append(data.get(question['id'], '').get('answer'))
-        row.append(data.get('final_result', ''))
 
         rows.append(row)
 

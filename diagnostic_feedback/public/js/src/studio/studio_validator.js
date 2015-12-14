@@ -1,6 +1,6 @@
 function CustomValidator(runtime, element, initData) {
   // contains all additional validation logic for wizard steps
-  showInvalidChoiceValueWarning = false;
+  showInvalidChoiceValueWarning = {showWarning: false, warningGroup: ''};
 
   var validatorObj = this,
     studioCommon = new StudioCommon(runtime, element, initData),
@@ -9,7 +9,9 @@ function CustomValidator(runtime, element, initData) {
   //selectors
     rangeMinSelector = "input[name*='range[min]']",
     rangeMaxSelector = "input[name*='range[max]']",
+    rangeGrpSelector = "input[name*='range[group]']",
     rangesPanel = '.diagnostic-feedback .ranges_panel',
+    grpSelector = '.group',
     rangeSelector = '.range';
 
   if (typeof gettext == "undefined") {
@@ -46,24 +48,28 @@ function CustomValidator(runtime, element, initData) {
 
   validatorObj.validateViaSimpleComparisons = function (range) {
     // validate if any two ranges are overlapping
-
     var valid = true,
       range1MinValue = parseFloat($(range).find(rangeMinSelector).val()),
       range1MaxValue = parseFloat($(range).find(rangeMaxSelector).val()),
-      nextRanges = $(range).nextAll(rangeSelector);
+      range1Group = $(range).find(rangeGrpSelector).val();
+
+    range1Group = range1Group ? range1Group : initData.DEFAULT_GROUP;
+    var nextRanges = $(range).parents(grpSelector).nextAll(grpSelector).find(rangeSelector);
+
 
     $.each(nextRanges, function (n, nextRange) {
       var range2MinValue = parseFloat($(nextRange).find(rangeMinSelector).val()),
         range2MaxValue = parseFloat($(nextRange).find(rangeMaxSelector).val()),
+        range2Group = $(nextRange).find(rangeGrpSelector).val(),
 
       //overlap = range1.min <= range2.max && range2.min <= range1.max;
-        overlap = range1MinValue <= range2MaxValue && range2MinValue <= range1MaxValue;
+        overlap = range1Group == range2Group && range1MinValue <= range2MaxValue && range2MinValue <= range1MaxValue;
 
       // check if both ranges are overlapping
       if (overlap) {
         valid = false;
         common.showMessage({
-          success: valid, msg: gettext('Overlapping ranges found') + ' ['
+          success: valid, msg: gettext('Overlapping ranges found in "') + range1Group +'" ['
           + range1MinValue + "-" + range1MaxValue + "] & [" + range2MinValue + "-" + range2MaxValue + "]"
         });
         return valid;
@@ -112,39 +118,41 @@ function CustomValidator(runtime, element, initData) {
     var valid = true;
 
     //get list of all choices for each question (it must be array of arrays)
-    var allQuestionsChoices = studioCommon.getAllWQuestionsChoices();
+    var allQuestionGroupsChoices = studioCommon.getAllWQuestionsChoices();
 
-    // generate all possible answers combinations for a quiz
-    var allPossibleAnswers = studioCommon.allPossibleAnswers(allQuestionsChoices);
-
-    var step2Data = studioCommon.getStepData(2);
-    var ranges = step2Data.ranges;
-
-    // validate each answer combination if its sum exist in any range defined at step 2
-    $.each(allPossibleAnswers, function (i, answer) {
-      var existInRange = validatorObj.isExistInRanges(answer, ranges);
-      if (!existInRange) {
-        // return false if answer sum not exists in any range
-        valid = false;
-        return valid;
-      }
+    $.each(allQuestionGroupsChoices, function(group, allGroupChoices){
+      // generate all possible answers combinations for a quiz group
+      var allPossibleAnswers = studioCommon.allPossibleAnswers(allGroupChoices);
+      var ranges = studioCommon.getGroupRanges(group);
+      // validate each answer combination if its sum exist in any range defined at step 2
+      $.each(allPossibleAnswers, function (i, answer) {
+        var existInRange = validatorObj.isExistInRanges(answer, ranges);
+        if (!existInRange) {
+          // return false if answer sum not exists in any range
+          valid = false;
+          showInvalidChoiceValueWarning.warningGroup = group;
+          return valid;
+        }
+      });
+      return valid;
     });
+
     return valid;
   };
 
   validatorObj.customStepValidation = function (step) {
     // custom validation for each wizard step
     var valid = true;
+
     var type = studioCommon.getQuizType();
     if (step == 2 && type == "DG") {
       valid = validatorObj.validateDiagnosticQuizStep2();
     }
     else if (step == 3 && type == "DG") {
       valid = validatorObj.validateDiagnosticQuizStep3();
-
       if (!valid) {
         valid = true;
-        showInvalidChoiceValueWarning = true;
+        showInvalidChoiceValueWarning.showWarning = true;
       }
     }
     return valid;

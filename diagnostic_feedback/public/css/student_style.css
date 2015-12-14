@@ -2,6 +2,7 @@
     float: left;
     padding-right: 10px;
     width: 200px;
+    height: 100px;
 }
 
 /*hide the wizard tabs for student view*/
@@ -45,6 +46,11 @@
     color: red !important;
 }
 
+.diagnostic-feedback-student .result{
+
+    min-height: 100px;
+}
+
 /*for apros*/
 .lesson-content .diagnostic-feedback-student .wizard > .content > .body {
     width: 100%;
@@ -55,4 +61,8 @@
 .course-content .diagnostic-feedback-student .wizard > .content > .body{
     width: 85%;
     height: 75%;
+}
+
+.diagnostic-feedback-student .response {
+    overflow-y: scroll;
 }
