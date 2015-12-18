@@ -240,13 +240,22 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         :return: fragment
         """
         block_id = "xblock-{}".format(self.get_block_id())
+        course_key = getattr(self.scope_ids.usage_id, 'course_key', None)
+
         context['self'] = self
         context['block_id'] = block_id
+
+        try:
+            from xmodule.contentstore.content import StaticContent
+            base_asset_url = StaticContent.get_base_url_path_for_course_assets(course_key)
+        except:
+            base_asset_url = ''
 
         return self.get_fragment(
             context,
             'studio',
             {
+                'base_asset_url': base_asset_url,
                 'quiz_type': self.quiz_type,
                 'block_id': block_id,
                 'results': self.results,
