@@ -49,10 +49,37 @@
                    id="<%- block_id %>_range[image][<%- order %>]"
                    name="<%- block_id %>_range[image][<%- order %>]" value="<%- image %>">
 
-            <input type="text" placeholder="<%- gettext('Attach to a group') %>"
-                   id="<%- block_id %>_range[group][<%- order %>]"
-                   name="<%- block_id %>_range[group][<%- order %>]" class="group-auto-complete range-autocomplete"
-                   value="<%- group %>" />
+            <span class="group-container">
+                <span class="new-grp-container hidden" >
+                    <input type="text" placeholder="<%- gettext('Create new group') %>" class="new-grp-name" value="" />
+                    <div class="field-actions">
+                        <a href="#" class="add-new-group" title="<%- gettext('Click to save') %>">
+                            <i class="icon fa fa-save"></i>
+                        </a>
+                        <a href="#" class="close-add-grp-panel" title="<%- gettext('Cancel') %>">
+                            <i class="icon fa fa-remove"></i>
+                        </a>
+                    </div>
+
+                </span>
+                <span class="existing-grps-list">
+                    <select id="<%- block_id %>_range[group][<%- order %>]"
+                            name="<%- block_id %>_range[group][<%- order %>]"
+                            class="result-group" >
+                        <% _.each(allGroups, function(c_group) { %>
+                            <option value="<%- c_group %>" <% if(c_group == group) { %>
+                                    selected="selected" <% } %> ><%- c_group %></option>
+
+                        <% }); %>
+                    </select>
+                    <div class="field-actions">
+                        <a title="<%- gettext('Click to add new group') %>" class="button button-new open-add-grp-panel" href="#">
+                            <i class="fa fa-plus"></i>
+                        </a>
+                    </div>
+                </span>
+
+            </span>
 
             <input placeholder="<%- gettext( 'Notes for author; not shown to students') %>"
                    class="internal-description" type="text"
