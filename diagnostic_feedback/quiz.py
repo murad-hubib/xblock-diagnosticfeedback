@@ -2,7 +2,7 @@ import logging
 import json
 import copy
 from xblock.core import XBlock
-from xblock.fields import Scope, String, List, Integer, Dict
+from xblock.fields import Scope, String, List, Integer, Dict, Boolean, Float
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from .mixins import ResourceMixin, XBlockWithTranslationServiceMixin
@@ -104,6 +104,20 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         help=_("To control which question should be shown to student")
     )
 
+    weight = Float(
+        display_name=_("Weight"),
+        help=_("Defines the maximum total grade of this question."),
+        default=1,
+        scope=Scope.content,
+        enforce_type=True
+    )
+
+    completed = Boolean(
+        default=False,
+        scope=Scope.user_state,
+        help=_("Has the student completed this quiz")
+    )
+
     @property
     def display_name_with_default(self):
         return self.title
@@ -115,6 +129,8 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
             'block_id': self.get_block_id(),
             'component_id': self.scope_ids.usage_id
         }
+
+    has_score = True
 
     def get_fragment(self, context, view='studio', json_args=None):
         """
@@ -318,29 +334,23 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
             success, response_message = Validator.validate_student_answer(self, data)
             if success:
                 question_id = data['question_id']
-                question_data = self.get_question(question_id)
-                if self.quiz_type == self.BUZZFEED_QUIZ_VALUE:
-                    question_answer = self.get_buzzfeed_answer(question_data['choices'], data['student_choice'])
-                else:
-                    question_answer = self.get_diagnostic_answer(question_data['choices'], data['student_choice'])
-
-                event_data = {
-                    'question_id': question_id,
-                    'question_title': question_data['title'],
-                    'question_text': question_data['text'],
-                    'answer': question_answer,
-                    'time': datetime.now()
-                }
 
                 # save student answer
                 self.student_choices[question_id] = data['student_choice']
                 if self.current_step < data['currentStep']:
                     self.current_step = data['currentStep']
 
-                self.runtime.publish(self, 'xblock.diagnostic_feedback.question.submitted', event_data)
                 # calculate feedback result if user answering last question
                 if data['isLast']:
                     student_result = self.get_result()
+
+                    if not self.completed:
+                        # Save the latest score and make quiz completed
+                        self.runtime.publish(self, 'grade', {
+                            'value': 1.0,
+                            'max_value': 1.0
+                        })
+                        self.completed = True
 
                     if my_api:
                         log.info("have sub_api instance")
@@ -350,8 +360,6 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                         submission_data = self.create_submission_data()
                         submission_data['final_result'] = student_result
                         my_api.create_submission(item_key, json.dumps(submission_data))
-                    else:
-                        log.info("not sub_api intance")
 
                 response_message = self._("Your response is saved")
         except Exception as ex:
