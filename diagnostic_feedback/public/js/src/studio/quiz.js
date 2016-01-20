@@ -7,12 +7,12 @@ function Quiz(runtime, element, initData) {
     setting = new Setting(runtime, element, initData),
     editQuestionPanel = ".diagnostic-feedback .edit_questionnaire_panel";
 
-  if (typeof gettext == "undefined") {
+  if (typeof gettext === "undefined") {
     window.gettext = function gettext_stub(string) {
       return string;
     };
     window.ngettext = function ngettext_stub(strA, strB, n) {
-      return n == 1 ? strA : strB;
+      return n === 1 ? strA : strB;
     };
   }
 
@@ -26,9 +26,9 @@ function Quiz(runtime, element, initData) {
     var $form = $(".diagnostic-feedback .questionnaire-form", element),
       $step1Panel = $(".diagnostic-feedback section[step='1']", element),
 
-      // child selector' which are either searched in an element already in current XBlock instance scope OR
-      // used as combination with some other selector, will be scoped to current XBlock instance (if required)
-      // at their usage places
+    // child selector' which are either searched in an element already in current XBlock instance scope OR
+    // used as combination with some other selector, will be scoped to current XBlock instance (if required)
+    // at their usage places
 
       categoriesPanel = '.diagnostic-feedback .categories_panel',
       addNewCategoryBtn = categoriesPanel + ' .add-new-category',
@@ -65,24 +65,24 @@ function Quiz(runtime, element, initData) {
     function renderSteps() {
       // render all steps html as XBlock studio view load
 
-      if (initData.quiz_type == "") {
+      if (initData.quiz_type === "") {
         // when first time studio view opens with no initData
         studioCommon.renderCategories();
-        studioCommon.createAccordion(categoriesPanel+ " " + accordionSelector, 'categories');
+        studioCommon.createAccordion(categoriesPanel + " " + accordionSelector, 'categories');
 
         studioCommon.renderRanges();
-        studioCommon.createAccordion(rangesPanel+ " " + accordionSelector, 'ranges');
-      } else if (initData.quiz_type == initData.BUZZFEED_QUIZ_VALUE) {
+        studioCommon.createAccordion(rangesPanel + " " + accordionSelector, 'ranges');
+      } else if (initData.quiz_type === initData.BUZZFEED_QUIZ_VALUE) {
         // when editing buzzfeed-style quiz
         studioCommon.renderCategories();
-        studioCommon.createAccordion(categoriesPanel+ " " + accordionSelector, 'categories');
+        studioCommon.createAccordion(categoriesPanel + " " + accordionSelector, 'categories');
       } else {
         // when editing dignostic-style quiz
         studioCommon.renderRanges();
-        studioCommon.createAccordion(rangesPanel+ " " + accordionSelector, 'ranges');
+        studioCommon.createAccordion(rangesPanel + " " + accordionSelector, 'ranges');
       }
       studioCommon.renderQuestions();
-      studioCommon.createAccordion(questionPanel+ " " + accordionSelector, 'questions');
+      studioCommon.createAccordion(questionPanel + " " + accordionSelector, 'questions');
     }
 
     //initialize js validations if on in setting.js
@@ -97,7 +97,7 @@ function Quiz(runtime, element, initData) {
           }
 
           var groups = $(element).parents('.group');
-          if(groups.length > 0){
+          if (groups.length > 0) {
             groups.removeClass(grpError);
           }
         },
@@ -112,7 +112,7 @@ function Quiz(runtime, element, initData) {
           }
 
           var groups = element.parents('.group');
-          if(groups.length > 0){
+          if (groups.length > 0) {
             groups.addClass(grpError);
           }
 
@@ -147,7 +147,7 @@ function Quiz(runtime, element, initData) {
           success = true;
 
           //close modal window if step3 saved successfully
-          if (response.step == 3) {
+          if (response.step === 3) {
             if (showInvalidChoiceValueWarning.showWarning) {
               common.showMessage({
                 success: false,
@@ -156,7 +156,7 @@ function Quiz(runtime, element, initData) {
                 msg: '<br />' +
                 gettext('Your data has been successfully saved.') +
                 '<br />' +
-                gettext('However, some answer combinations in "' + showInvalidChoiceValueWarning. warningGroup +
+                gettext('However, some answer combinations in "' + showInvalidChoiceValueWarning.warningGroup +
                   '" may not belong to any result in that group.') +
                 '<a class="close_msg" href="#" style="float: right">' +
                 gettext('Close') +
@@ -169,7 +169,7 @@ function Quiz(runtime, element, initData) {
           }
         }
 
-        if (response.step != 3 || (response.step == 3 && !response.success)) {
+        if (response.step !== 3 || (response.step === 3 && !response.success)) {
           common.showMessage(response);
         }
       });
@@ -181,15 +181,15 @@ function Quiz(runtime, element, initData) {
       // if return true next stepp will be loaded
       // if return false validation errors will be shown
 
-     // generic validation rules
-     var fieldToIgnore = [
-       'section:visible .skip-validation',
-       'section:hidden input',
-       'section:hidden textarea',
-       'section:hidden select'
-     ],
-     quizType = studioCommon.getQuizType(),
-     customValidated = false;
+      // generic validation rules
+      var fieldToIgnore = [
+          'section:visible .skip-validation',
+          'section:hidden input',
+          'section:hidden textarea',
+          'section:hidden select'
+        ],
+        quizType = studioCommon.getQuizType(),
+        customValidated = false;
 
       tinyMCE.triggerSave();
 
@@ -203,9 +203,9 @@ function Quiz(runtime, element, initData) {
         //execute both server side & js validations if on in setting.js
         if (setting.jsValidation) {
           //ignore hidden fields; will validate on current step showing fields
-          if (currentStep == 2 ) {
+          if (currentStep === 2) {
             // add step-2 related validation rules
-            if (quizType == initData.BUZZFEED_QUIZ_VALUE){
+            if (quizType === initData.BUZZFEED_QUIZ_VALUE) {
               // in buzzfeed-style quiz ignore diagnostic-style quiz (ranges) related fields
               fieldToIgnore = fieldToIgnore.concat([
                 'section:visible .ranges_panel input:hidden',
@@ -221,12 +221,12 @@ function Quiz(runtime, element, initData) {
 
           } else {
             // add step-3 related validation rules
-            if(quizType == initData.BUZZFEED_QUIZ_VALUE){
+            if (quizType === initData.BUZZFEED_QUIZ_VALUE) {
               // in buzzfeed-style quiz ignore diagnostic-style quiz related fields
               fieldToIgnore = fieldToIgnore.concat([
                 'section:visible input.answer-value:hidden'
               ]);
-            }else {
+            } else {
               // in diagnostic-style quiz ignore buzzfeed-style quiz related fields
               fieldToIgnore = fieldToIgnore.concat([
                 'section:visible select.result-choice:hidden'
@@ -328,15 +328,15 @@ function Quiz(runtime, element, initData) {
         field = el.parent().prev('.new-grp-name'),
         name = field.val();
 
-      if (name){
+      if (name) {
 
         $.ajax({
           type: "POST",
           url: groupHandlerUrl,
           data: JSON.stringify({name: name}),
-          success: function(response) {
+          success: function (response) {
             var success, warning;
-            if(response.success){
+            if (response.success) {
               success = true;
               warning = false;
               field.val('');
@@ -355,8 +355,8 @@ function Quiz(runtime, element, initData) {
               msg: response.msg
             });
           },
-          error: function(response) {
-              console.log(response);
+          error: function (response) {
+            console.log(response);
           }
         });
       }
@@ -399,7 +399,7 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget),
         categoriesContainer = $(btn).parents(categoriesPanel).first();
 
-      if (categoriesContainer.find(categorySelector).length == 1) {
+      if (categoriesContainer.find(categorySelector).length === 1) {
         // show waring if trying to delete last category
         common.showMessage({
           success: false,
@@ -437,7 +437,7 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget);
       var rangesContainer = $(btn).parents(rangesPanel).first();
 
-      if (rangesContainer.find(rangeSelector).length == 1) {
+      if (rangesContainer.find(rangeSelector).length === 1) {
         //show waring if trying to delete last range
         common.showMessage({
           success: false,
@@ -468,7 +468,7 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget);
       var questionsContainer = $(btn).parents(questionPanel).first();
 
-      if (questionsContainer.find(questionSelector).length == 1) {
+      if (questionsContainer.find(questionSelector).length === 1) {
         //show waning if tring to delete last question
         common.showMessage({
           success: false,
@@ -496,18 +496,18 @@ function Quiz(runtime, element, initData) {
       }
     });
 
-    $(questionPanel, element).on('change', questionGrpSelector, function(eventObject){
-        eventObject.preventDefault();
-        var group = $(eventObject.target).val();
-        var grpCategories = studioCommon.getGroupCategories(group);
-        studioCommon.updateSortingGroupTxt($(eventObject.target), group);
-        studioCommon.updateAllResultDropwdowns($(eventObject.target), grpCategories);
+    $(questionPanel, element).on('change', questionGrpSelector, function (eventObject) {
+      eventObject.preventDefault();
+      var group = $(eventObject.target).val();
+      var grpCategories = studioCommon.getGroupCategories(group);
+      studioCommon.updateSortingGroupTxt($(eventObject.target), group);
+      studioCommon.updateAllResultDropwdowns($(eventObject.target), grpCategories);
     });
 
-    $(editQuestionPanel , element).on('change', resultGroupSelector, function(eventObject){
-        eventObject.preventDefault();
-        var group = $(eventObject.target).val();
-        studioCommon.updateSortingGroupTxt($(eventObject.target), group);
+    $(editQuestionPanel, element).on('change', resultGroupSelector, function (eventObject) {
+      eventObject.preventDefault();
+      var group = $(eventObject.target).val();
+      studioCommon.updateSortingGroupTxt($(eventObject.target), group);
     });
 
     $(questionPanel, element).on('click', deleteChoiceBtn, function (eventObject) {
@@ -518,7 +518,7 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget);
       var answersContainer = $(btn).parents(questionSelector).first();
 
-      if (answersContainer.find(choiceSelector).length == 1) {
+      if (answersContainer.find(choiceSelector).length === 1) {
         //show warning if trying to delete last choice
         common.showMessage({
           success: false,
@@ -559,11 +559,11 @@ function Quiz(runtime, element, initData) {
       studioCommon.notify('destoryEditors', {});
     });
 
-    runtime.listenTo('destoryEditors', function(){
+    runtime.listenTo('destoryEditors', function () {
       // Destroy all editor as modal window closed
       studioCommon.destroyAllEditors($(editQuestionPanel, element));
       runtime.modal.editOptions.refresh(runtime.modal.xblockInfo);
     });
   });
-  
+
 }

@@ -89,5 +89,5 @@ function Common(runtime, element, initData) {
       url: runtime.handlerUrl(element, 'publish_event'),
       data: JSON.stringify(data)
     });
-    }
+  }
 }
