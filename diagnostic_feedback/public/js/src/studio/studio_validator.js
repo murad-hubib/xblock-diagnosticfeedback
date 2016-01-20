@@ -14,12 +14,12 @@ function CustomValidator(runtime, element, initData) {
     grpSelector = '.group',
     rangeSelector = '.range';
 
-  if (typeof gettext == "undefined") {
+  if (typeof gettext === "undefined") {
     window.gettext = function gettext_stub(string) {
       return string;
     };
     window.ngettext = function ngettext_stub(strA, strB, n) {
-      return n == 1 ? strA : strB;
+      return n === 1 ? strA : strB;
     };
   }
 
@@ -32,13 +32,13 @@ function CustomValidator(runtime, element, initData) {
 
     var rangeMinValue = $(range).find(rangeMinSelector).val();
     var rangeMaxValue = $(range).find(rangeMaxSelector).val();
-    if (rangeMinValue != "" && isNaN(parseFloat(rangeMinValue))) {
+    if (rangeMinValue !== "" && isNaN(parseFloat(rangeMinValue))) {
       valid = false;
       common.showMessage({success: valid, msg: gettext('Range Min value must be float')});
-    } else if (rangeMaxValue != "" && isNaN(parseFloat(rangeMaxValue))) {
+    } else if (rangeMaxValue !== "" && isNaN(parseFloat(rangeMaxValue))) {
       valid = false;
       common.showMessage({success: valid, msg: gettext('Range Max value must be float')});
-    } else if (rangeMinValue != "" && rangeMaxValue != "" && parseFloat(rangeMaxValue) <= parseFloat(rangeMinValue)) {
+    } else if (rangeMinValue !== "" && rangeMaxValue !== "" && parseFloat(rangeMaxValue) <= parseFloat(rangeMinValue)) {
       valid = false;
       common.showMessage({success: valid, msg: gettext('Min value must be < Max')});
     }
@@ -63,13 +63,13 @@ function CustomValidator(runtime, element, initData) {
         range2Group = $(nextRange).find(rangeGrpSelector).val(),
 
       //overlap = range1.min <= range2.max && range2.min <= range1.max;
-        overlap = range1Group == range2Group && range1MinValue <= range2MaxValue && range2MinValue <= range1MaxValue;
+        overlap = range1Group === range2Group && range1MinValue <= range2MaxValue && range2MinValue <= range1MaxValue;
 
       // check if both ranges are overlapping
       if (overlap) {
         valid = false;
         common.showMessage({
-          success: valid, msg: gettext('Overlapping ranges found in "') + range1Group +'" ['
+          success: valid, msg: gettext('Overlapping ranges found in "') + range1Group + '" ['
           + range1MinValue + "-" + range1MaxValue + "] & [" + range2MinValue + "-" + range2MaxValue + "]"
         });
         return valid;
@@ -120,7 +120,7 @@ function CustomValidator(runtime, element, initData) {
     //get list of all choices for each question (it must be array of arrays)
     var allQuestionGroupsChoices = studioCommon.getAllWQuestionsChoices();
 
-    $.each(allQuestionGroupsChoices, function(group, allGroupChoices){
+    $.each(allQuestionGroupsChoices, function (group, allGroupChoices) {
       // generate all possible answers combinations for a quiz group
       var allPossibleAnswers = studioCommon.allPossibleAnswers(allGroupChoices);
       var ranges = studioCommon.getGroupRanges(group);
@@ -145,10 +145,10 @@ function CustomValidator(runtime, element, initData) {
     var valid = true;
 
     var type = studioCommon.getQuizType();
-    if (step == 2 && type == "DG") {
+    if (step === 2 && type === "DG") {
       valid = validatorObj.validateDiagnosticQuizStep2();
     }
-    else if (step == 3 && type == "DG") {
+    else if (step === 3 && type === "DG") {
       valid = validatorObj.validateDiagnosticQuizStep3();
       if (!valid) {
         valid = true;
