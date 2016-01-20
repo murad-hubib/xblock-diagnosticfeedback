@@ -9,12 +9,12 @@ function StudentQuiz(runtime, element, initData) {
   studentQuiz.startOver = false;
   studentQuiz.movingToStep = false;
 
-  if (typeof gettext == "undefined") {
+  if (typeof gettext === "undefined") {
     window.gettext = function gettext_stub(string) {
       return string;
     };
     window.ngettext = function ngettext_stub(strA, strB, n) {
-      return n == 1 ? strA : strB;
+      return n === 1 ? strA : strB;
     };
   }
 
@@ -87,16 +87,16 @@ function StudentQuiz(runtime, element, initData) {
       // show next, previous, finish action button
       $(nextActionSelector + ', ' + previousActionSelector, element).show();
       $(cancelActionSelector, element).hide();
-        disableButton();
+      disableButton();
     }
 
-    function disableButton(){
+    function disableButton() {
       $(nextActionSelector, element).parent().addClass("disabled").attr("aria-" + "disabled", "true");
     }
 
-     function enableButton(){
-         $(nextActionSelector, element).parent().removeClass("disabled").attr("aria-" + "disabled", "false");;
-     }
+    function enableButton() {
+      $(nextActionSelector, element).parent().removeClass("disabled").attr("aria-" + "disabled", "false");
+    }
 
     function showResult(result) {
       // shows result of student
@@ -104,8 +104,8 @@ function StudentQuiz(runtime, element, initData) {
       $(finalResult, element).html(finalResultHtml);
       hideActions();
       common.publishEvent({
-       event_type: 'xblock.diagnostic_feedback.quiz.result',
-       result_content: finalResultHtml
+        event_type: 'xblock.diagnostic_feedback.quiz.result',
+        result_content: finalResultHtml
       });
     }
 
@@ -149,7 +149,7 @@ function StudentQuiz(runtime, element, initData) {
             showResult(response.student_result);
           }
 
-          if(success){
+          if (success) {
             //log event for question submission success
             event_data.event_type = 'xblock.diagnostic_feedback.quiz.question.submitted';
             common.publishEvent(event_data);
@@ -169,10 +169,10 @@ function StudentQuiz(runtime, element, initData) {
       var success = false;
       var event_type = 'xblock.diagnostic_feedback.quiz.startover',
         event_data = {
-        event_type: event_type,
-        quiz_type: initData.quiz_type,
-        quiz_title: initData.quiz_title
-      };
+          event_type: event_type,
+          quiz_type: initData.quiz_type,
+          quiz_title: initData.quiz_title
+        };
 
       //log event for quiz startover
       common.publishEvent(event_data);
@@ -187,7 +187,7 @@ function StudentQuiz(runtime, element, initData) {
           success = response.success;
           resetActions();
 
-          if(success){
+          if (success) {
             event_data.event_type = 'xblock.diagnostic_feedback.quiz.startover.scuccess';
           } else {
             event_data.event_type = 'xblock.diagnostic_feedback.quiz.startover.failed';
@@ -195,7 +195,6 @@ function StudentQuiz(runtime, element, initData) {
           event_data.response_message = response.msg;
         }
       });
-
 
 
       //log event for quiz startover success/failure
@@ -216,7 +215,7 @@ function StudentQuiz(runtime, element, initData) {
         event_type: 'xblock.diagnostic_feedback.quiz.started',
         quiz_type: initData.quiz_type,
         quiz_title: initData.quiz_title,
-        current_question:  completedStep + 1
+        current_question: completedStep + 1
       });
 
       if (completedStep > 0) {
@@ -230,11 +229,11 @@ function StudentQuiz(runtime, element, initData) {
       //on every step change this method either save the data to the server or skip it.
 
       var btn = $(nextActionSelector, element).parent();
-      if(btn.hasClass('disabled') && newIndex > currentIndex ){
-            return false;
-        }
-        var currentStep = currentIndex + 1;
-      var isLast = (newIndex == $(studentViewFormSecSelector, element).length - 1);
+      if (btn.hasClass('disabled') && newIndex > currentIndex) {
+        return false;
+      }
+      var currentStep = currentIndex + 1;
+      var isLast = (newIndex === $(studentViewFormSecSelector, element).length - 1);
 
       //log event for loading question
       common.publishEvent({
@@ -255,14 +254,14 @@ function StudentQuiz(runtime, element, initData) {
       // for apros
       var target_height = 60;
 
-      if($('.lesson-content').length == 0){
+      if ($('.lesson-content').length === 0) {
         // for lms
         target_height = 120;
       }
 
       var q_container = $(".question-container:visible .q-container");
 
-      if(q_container.length == 0){
+      if (q_container.length === 0) {
         //if final result
         target_height = $(".response_body").height() + target_height;
       } else {
@@ -278,14 +277,14 @@ function StudentQuiz(runtime, element, initData) {
       //he will be showed the result and start over button.
 
       resizeContentContainer();
-      if($(visibleAnswerChoice, element).find(selectedStudentChoice).val()){
-           enableButton();
-        }
-      else{
-          disableButton();
+      if ($(visibleAnswerChoice, element).find(selectedStudentChoice).val()) {
+        enableButton();
+      }
+      else {
+        disableButton();
       }
 
-      var isLast = (currentIndex == $(studentViewFormSecSelector, element).length - 1);
+      var isLast = (currentIndex === $(studentViewFormSecSelector, element).length - 1);
       if (isLast) {
         hideActions();
       }
@@ -296,7 +295,7 @@ function StudentQuiz(runtime, element, initData) {
       studentQuiz.startOver = true;
       $(choiceSelector, element).find(choiceSelectedBtnSelector).removeAttr('checked');
       $form.children("div").steps("setStep", 0);
-        disableButton();
+      disableButton();
     }
 
 
@@ -320,7 +319,7 @@ function StudentQuiz(runtime, element, initData) {
         }
         var selectedChoice = $(visibleAnswerChoice, element).find(selectedStudentChoice).val();
 
-        if (selectedChoice != "" && selectedChoice != undefined) {
+        if (selectedChoice !== "" && selectedChoice !== undefined) {
           return submitQuestionResponse(isLast, currentStep);
         } else {
           //log event for question validation error
@@ -353,7 +352,7 @@ function StudentQuiz(runtime, element, initData) {
         $exportProgress.html(gettext('The report is currently being generated…'));
         setTimeout(getStatus, 1000);
       } else {
-        if(response.download_url){
+        if (response.download_url) {
           $exportProgress.html(gettext('Report is successfully generated. Downloading…'));
           window.location.href = response.download_url;
         } else {
@@ -361,10 +360,11 @@ function StudentQuiz(runtime, element, initData) {
         }
       }
     }
-      $(choiceSelectedBtnSelector).on('change', function() {
-          if($(selectedStudentChoice).val()){
-             enableButton();
-          }
+
+    $(choiceSelectedBtnSelector).on('change', function () {
+      if ($(selectedStudentChoice).val()) {
+        enableButton();
+      }
     });
 
     $(studentViewFormSelector, element).on('click', exportDataBtnSelector, function (eventObject) {

@@ -1,12 +1,12 @@
 function StudioCommon(runtime, element, initData) {
   "use strict";
 
-  if (typeof gettext == "undefined") {
+  if (typeof gettext === "undefined") {
     window.gettext = function gettext_stub(string) {
       return string;
     };
     window.ngettext = function ngettext_stub(strA, strB, n) {
-      return n == 1 ? strA : strB;
+      return n === 1 ? strA : strB;
     };
   }
 
@@ -17,14 +17,14 @@ function StudioCommon(runtime, element, initData) {
     allGroups = initData.groups,
     attachedGroups = initData.attachedGroups,
 
-    // selector' to scope elements for the current XBlock instance, to
-    // differentiate multiple diagnostic feedback blocks on one page
+  // selector' to scope elements for the current XBlock instance, to
+  // differentiate multiple diagnostic feedback blocks on one page
     $loadingDiv = $('.diagnostic-feedback .wizard-loading', element),
     $editQuizPanel = $('.diagnostic-feedback .edit_questionnaire_panel', element),
 
-    // child selector' which are either searched in an element already in current XBlock instance scope OR
-    // used as combination with some other selector, will be scoped to current XBlock instance (if required)
-    // at their usage places
+  // child selector' which are either searched in an element already in current XBlock instance scope OR
+  // used as combination with some other selector, will be scoped to current XBlock instance (if required)
+  // at their usage places
     quizTitleSelector = '.diagnostic-feedback input[name*="title"]',
     quizTypeSelector = '.diagnostic-feedback select[name*="type"] option:selected',
     quizTypeInputSelector = '.diagnostic-feedback input[name*="type"]',
@@ -86,14 +86,14 @@ function StudioCommon(runtime, element, initData) {
     + "Times New Roman=times new roman,times;" + "Trebuchet MS=trebuchet ms,geneva;"
     + "Verdana=verdana,geneva;" + "Webdings=webdings;" + "Wingdings=wingdings,zapf dingbats";
 
-  _getFonts = function() {
+  _getFonts = function () {
     return CUSTOM_FONTS + STANDARD_FONTS;
   };
 
   tinyMCE.baseURL = "" + baseUrl + "/js/vendor/tinymce/js/tinymce";
   tinyMCE.suffix = ".min";
 
-  commonObj.notify = function (name, data){
+  commonObj.notify = function (name, data) {
     // Notification interface does not exist in the workbench.
     if (runtime.notify) {
       runtime.notify(name, data);
@@ -132,7 +132,7 @@ function StudioCommon(runtime, element, initData) {
     return total;
   };
 
-  commonObj.updateResultSortTitle = function(eventObject){
+  commonObj.updateResultSortTitle = function (eventObject) {
     eventObject.preventDefault();
 
     var _input = $(eventObject.currentTarget),
@@ -141,14 +141,14 @@ function StudioCommon(runtime, element, initData) {
     $(_input).parents(accordionGrpSelector).find(sortTitleSelector).html(inputVal);
   };
 
-  commonObj.bindSortTitleSources = function(){
-    $.each($(editQuestionPanel, element).find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector), function(){
+  commonObj.bindSortTitleSources = function () {
+    $.each($(editQuestionPanel, element).find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector), function () {
       $(this).unbind('keyup');
       $(this).bind('keyup', commonObj.updateResultSortTitle);
     });
   };
 
-  commonObj.bindSortTitleSource = function(container){
+  commonObj.bindSortTitleSource = function (container) {
     container.find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector).bind('keyup', commonObj.updateResultSortTitle);
   };
 
@@ -158,7 +158,7 @@ function StudioCommon(runtime, element, initData) {
     var questionsChoices = {};
     $.each($(questionPanelSelector + ' ' + questionSelector), function (i, question) {
       var qGroup = $(question).find(questionGroupFieldSelector).val();
-      if(!(qGroup in questionsChoices)){
+      if (!(qGroup in questionsChoices)) {
         questionsChoices[qGroup] = [];
       }
       var choices = [];
@@ -210,11 +210,11 @@ function StudioCommon(runtime, element, initData) {
     return combinations;
   };
 
-  commonObj.termInStrArray = function(term, _array){
+  commonObj.termInStrArray = function (term, _array) {
     // check if a string exists in array of strings
     var isInArray = false;
-    $.each(_array, function(i, value){
-      if(term.trim().toLowerCase() == value.trim().toLowerCase()){
+    $.each(_array, function (i, value) {
+      if (term.trim().toLowerCase() === value.trim().toLowerCase()) {
         isInArray = true;
         return false;
       }
@@ -222,32 +222,34 @@ function StudioCommon(runtime, element, initData) {
     return isInArray;
   };
 
-  commonObj.showAddGrpPanel = function(btn){
+  commonObj.showAddGrpPanel = function (btn) {
     // show add new grou panel
     btn.parent().parent().addClass('hidden');
     btn.parent().parent().prev().removeClass('hidden');
   };
 
-  commonObj.hideAddGrpPanel = function(btn){
+  commonObj.hideAddGrpPanel = function (btn) {
     // show grops list dropdown
     btn.parent().parent().addClass('hidden');
     btn.parent().parent().next().removeClass('hidden');
   };
 
-  commonObj.updateSortingGroupTxt = function(el, txt){
+  commonObj.updateSortingGroupTxt = function (el, txt) {
     // update text for group in accordion header
-    if(el.hasClass('question-group')){
-      if(txt) { txt = "( " + txt + " )"; }
+    if (el.hasClass('question-group')) {
+      if (txt) {
+        txt = "( " + txt + " )";
+      }
     }
     el.parents(accordionGrpSelector).find(sortTitleGrpSelector).text(txt);
   };
 
   // tinymce methods start
 
-  commonObj.destroyAllEditors = function(container){
+  commonObj.destroyAllEditors = function (container) {
     // destory all editors instances in a specific container
     var editors = container.find(tinyMceTextarea);
-    $.each(editors, function(i, editor){
+    $.each(editors, function (i, editor) {
       commonObj.destroyEditor(editor);
     });
   };
@@ -260,15 +262,15 @@ function StudioCommon(runtime, element, initData) {
     }
   };
 
-  commonObj.showCodeEditor = function(source) {
+  commonObj.showCodeEditor = function (source) {
     return commonObj.showCodeEditor.apply(commonObj, arguments);
   };
 
-  commonObj.setupTinyMCE = function(ed) {
+  commonObj.setupTinyMCE = function (ed) {
     ed.addButton('wrapAsCode', {
       title: 'Code block',
       image: "" + baseUrl + "/images/ico-tinymce-code.png",
-      onclick: function() {
+      onclick: function () {
         return ed.formatter.toggle('code');
       }
     });
@@ -281,43 +283,43 @@ function StudioCommon(runtime, element, initData) {
     return ed.on('SaveCodeEditor', commonObj.saveCodeEditor);
   };
 
-  commonObj.editImage = function(data) {
+  commonObj.editImage = function (data) {
     if (data['src']) {
       return data['src'] = rewriteStaticLinks(data['src'], initData.base_asset_url, '/static/');
     }
   };
 
-  commonObj.saveImage = function(data) {
+  commonObj.saveImage = function (data) {
     if (data['src']) {
       return data['src'] = rewriteStaticLinks(data['src'], '/static/', initData.base_asset_url);
     }
   };
 
-  commonObj.editLink = function(data) {
+  commonObj.editLink = function (data) {
     if (data['href']) {
       return data['href'] = rewriteStaticLinks(data['href'], initData.base_asset_url, '/static/');
     }
   };
 
-  commonObj.saveLink = function(data) {
+  commonObj.saveLink = function (data) {
     if (data['href']) {
       return data['href'] = rewriteStaticLinks(data['href'], '/static/', initData.base_asset_url);
     }
   };
 
-  commonObj.showCodeEditor = function(source) {
+  commonObj.showCodeEditor = function (source) {
     var content;
     content = rewriteStaticLinks(source.content, initData.base_asset_url, '/static/');
     return source.content = content;
   };
 
-  commonObj.saveCodeEditor = function(source) {
+  commonObj.saveCodeEditor = function (source) {
     var content;
     content = rewriteStaticLinks(source.content, '/static/', initData.base_asset_url);
     return source.content = content;
   };
 
-  commonObj.initInstanceCallback = function(visualEditor) {
+  commonObj.initInstanceCallback = function (visualEditor) {
     visualEditor.setContent(rewriteStaticLinks(visualEditor.getContent({
       no_events: 1
     }), '/static/', initData.base_asset_url));
@@ -332,10 +334,9 @@ function StudioCommon(runtime, element, initData) {
     height = typeof height !== 'undefined' ? height : '70px';
 
 
-
     //initialize tinymce on a textarea
     tiny_mce_css_links = [];
-    $("link[rel=stylesheet][href*='tinymce']").filter("[href*='content']").each(function() {
+    $("link[rel=stylesheet][href*='tinymce']").filter("[href*='content']").each(function () {
       tiny_mce_css_links.push($(this).attr("href"));
     });
 
@@ -397,11 +398,11 @@ function StudioCommon(runtime, element, initData) {
 
     var data = {step: step};
     var stepData = {};
-    if (step == 1) {
+    if (step === 1) {
       stepData = commonObj.getStep1Data();
-    } else if (step == 2) {
+    } else if (step === 2) {
       stepData = commonObj.getStep2Data();
-    } else if (step == 3) {
+    } else if (step === 3) {
       stepData = commonObj.getStep3Data();
     }
     data = $.extend(data, stepData);
@@ -421,16 +422,18 @@ function StudioCommon(runtime, element, initData) {
     });
   };
 
-  commonObj.updateAllGroups = function(group){
+  commonObj.updateAllGroups = function (group) {
     // add new group to allGroups variable
     allGroups.push(group);
   };
 
-  commonObj.getOptionsList = function (dropdown){
+  commonObj.getOptionsList = function (dropdown) {
     // get array list of option text of a given dropdown
-    return $(dropdown).find('option').map(function() {
+    return $(dropdown).find('option').map(function () {
       var _value = $(this).val();
-      if(_value != "") { return $(this).val(); }
+      if (_value !== "") {
+        return $(this).val();
+      }
     }).get()
   };
 
@@ -453,7 +456,7 @@ function StudioCommon(runtime, element, initData) {
     var dropDowns = $(allQuestionGroupChoicesDropdowns, element);
     $.each(dropDowns, function (i, dropdown) {
       var selectedValue = "";
-      if(attachedGroups.length == 1) {
+      if (attachedGroups.length === 1) {
         selectedValue = attachedGroups[0];
       } else {
         selectedValue = $(dropdown).val();
@@ -463,18 +466,18 @@ function StudioCommon(runtime, element, initData) {
       $(dropdown).html(groupOptions);
 
       var options = commonObj.getOptionsList(dropdown);
-      if(options.indexOf(selectedValue) < 0){
+      if (options.indexOf(selectedValue) < 0) {
         selectedValue = "";
       }
 
       $(dropdown).val(selectedValue);
       commonObj.updateSortingGroupTxt($(dropdown), selectedValue);
 
-      if(initData.BUZZFEED_QUIZ_VALUE){
+      if (initData.BUZZFEED_QUIZ_VALUE) {
         var selectedGroup = $(dropdown).val(),
           categories = commonObj.getGroupCategories(selectedGroup);
         commonObj.updateAllResultDropwdowns($(dropdown), categories);
-    }
+      }
     });
   };
 
@@ -490,7 +493,7 @@ function StudioCommon(runtime, element, initData) {
       var id = category.id,
         name = category.name;
 
-        _html += "<option value='" + id + "'>" + name + "</option>";
+      _html += "<option value='" + id + "'>" + name + "</option>";
     });
 
     return dropdown.html() + _html;
@@ -507,18 +510,18 @@ function StudioCommon(runtime, element, initData) {
     var _html = '';
     $.each(groups, function (i, group) {
 
-        _html += "<option value='" + group + "'>" + group + "</option>";
+      _html += "<option value='" + group + "'>" + group + "</option>";
     });
 
     return dropdown.html() + _html;
   };
 
-  commonObj.updateAttachedGroups = function(results) {
+  commonObj.updateAttachedGroups = function (results) {
     // update value of attachedGroups by iterating over results added at step2
 
     var groups = [];
-    $.each(results, function(i, result){
-      if(groups.indexOf(result.group) < 0){
+    $.each(results, function (i, result) {
+      if (groups.indexOf(result.group) < 0) {
         groups.push(result.group);
       }
     });
@@ -530,9 +533,9 @@ function StudioCommon(runtime, element, initData) {
     // Manipulate DOM of next step in wizard, based on the last step selections
 
     var quizType = commonObj.getQuizType();
-    if (step == 1) {
+    if (step === 1) {
       // for 2nd step of wizard
-      if (quizType == initData.BUZZFEED_QUIZ_VALUE) {
+      if (quizType === initData.BUZZFEED_QUIZ_VALUE) {
         // in case of quiz type is BuzzFeed
         // show categories html
         // hide ranges html
@@ -550,10 +553,10 @@ function StudioCommon(runtime, element, initData) {
         $(rangesPanel, element).removeClass('hide').addClass('show');
         commonObj.initiateHtmlEditor($(rangesPanel, element), true);
       }
-    } else if (step == 2) {
+    } else if (step === 2) {
       // for 3rd step of wizard
       var results = [];
-      if (quizType == 'BFQ') {
+      if (quizType === 'BFQ') {
         // in case quiz type is Buzzfeed
         // fill all results dropdown with categories selected at step 2
         // hide range related inputs and show result dropdowns
@@ -622,7 +625,7 @@ function StudioCommon(runtime, element, initData) {
     });
   };
 
-  commonObj.getGroupCategories = function(groupName){
+  commonObj.getGroupCategories = function (groupName) {
     // return all categories with in a group
 
     var allCategories = commonObj.getCategoriesList('category[name]');
@@ -631,8 +634,8 @@ function StudioCommon(runtime, element, initData) {
     }
 
     var groupCategories = [];
-    $.each(allCategories, function(i, category){
-      if(category.group === groupName){
+    $.each(allCategories, function (i, category) {
+      if (category.group === groupName) {
         groupCategories.push(category)
       }
     });
@@ -640,7 +643,7 @@ function StudioCommon(runtime, element, initData) {
   };
 
 
-  commonObj.getGroupRanges = function(groupName){
+  commonObj.getGroupRanges = function (groupName) {
     // return all categories with in a group
 
     var allRanges = commonObj.getRangesList('range[name]');
@@ -649,8 +652,8 @@ function StudioCommon(runtime, element, initData) {
     }
 
     var groupRangs = [];
-    $.each(allRanges, function(i, range){
-      if(range.group === groupName){
+    $.each(allRanges, function (i, range) {
+      if (range.group === groupName) {
         groupRangs.push(range)
       }
     });
@@ -677,8 +680,10 @@ function StudioCommon(runtime, element, initData) {
         htmlBody = $('textarea[name*="category[html_body][' + order + ']"]', element).val();
 
       group = commonObj.termInStrArray(group, allGroups) ? group.trim() : initData.DEFAULT_GROUP;
-      return {id: id, name: name, order: catOrder,  image: image, group: group,
-        internal_description: internalDescription, html_body: htmlBody};
+      return {
+        id: id, name: name, order: catOrder, image: image, group: group,
+        internal_description: internalDescription, html_body: htmlBody
+      };
     }).get();
   };
 
@@ -705,7 +710,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getStep1Data = function () {
     // Return first step data
-    
+
     var type = commonObj.getQuizType();
     return {
       title: $(quizTitleSelector, element).val(),
@@ -718,7 +723,7 @@ function StudioCommon(runtime, element, initData) {
     // Get data of step2
 
     var type = commonObj.getQuizType();
-    if (type == 'BFQ') {
+    if (type === 'BFQ') {
       return {
         'categories': commonObj.getCategoriesList('category[name]')
       }
@@ -741,7 +746,7 @@ function StudioCommon(runtime, element, initData) {
       var questionObj = {
         order: $(container).find(questionOrderFieldSelector).val(),
         question_title: $(container).find(questionTitleFieldSelector).val(),
-        group: group != "" ? group.trim() : initData.DEFAULT_GROUP,
+        group: group !== "" ? group.trim() : initData.DEFAULT_GROUP,
         question_txt: $(container).find(questionTxtFieldSelector).val(),
         choices: []
       };
@@ -766,12 +771,12 @@ function StudioCommon(runtime, element, initData) {
     return {'questions': questions};
   };
 
-  commonObj.refreshAccordion = function(_id){
-  // refresg an instance of jquery-accordion
-    $( _id ).accordion('refresh');
+  commonObj.refreshAccordion = function (_id) {
+    // refresg an instance of jquery-accordion
+    $(_id).accordion('refresh');
   };
 
-  commonObj.processCategories = function(categoriesContainer){
+  commonObj.processCategories = function (categoriesContainer) {
 
     //update attributes of all category fields after sort/delete
     var remainingCategories = categoriesContainer.find(categorySelector);
@@ -783,7 +788,7 @@ function StudioCommon(runtime, element, initData) {
       $(category).find(categoryOrderFieldSelector).val(i);
 
       $.each(fields, function (k, field) {
-          commonObj.updateFieldAttr($(field), i);
+        commonObj.updateFieldAttr($(field), i);
       });
     });
 
@@ -791,7 +796,7 @@ function StudioCommon(runtime, element, initData) {
     commonObj.initiateHtmlEditor($(categoriesPanel, element));
   };
 
-  commonObj.processRanges = function(rangesContainer){
+  commonObj.processRanges = function (rangesContainer) {
     //update attributes of all range fields after sort/delete
 
     var remainingRanges = rangesContainer.find(rangeSelector);
@@ -802,7 +807,7 @@ function StudioCommon(runtime, element, initData) {
       $(range).find(rangeOrderFieldSelector).val(i);
 
       $.each(fields, function (k, field) {
-          commonObj.updateFieldAttr($(field), i);
+        commonObj.updateFieldAttr($(field), i);
       });
     });
 
@@ -810,7 +815,7 @@ function StudioCommon(runtime, element, initData) {
     commonObj.initiateHtmlEditor($(rangesPanel, element));
   };
 
-  commonObj.processQuestions = function(questionsContainer){
+  commonObj.processQuestions = function (questionsContainer) {
     // rename all remaining question fields including its choice
     var remainingQuestions = questionsContainer.find(questionSelector);
     $.each(remainingQuestions, function (i, question) {
@@ -829,9 +834,9 @@ function StudioCommon(runtime, element, initData) {
     commonObj.initiateHtmlEditor($(questionPanelSelector, element));
   };
 
-  commonObj.createAccordion = function(_id, type) {
+  commonObj.createAccordion = function (_id, type) {
     // attach jquery-accordion with an element
-      $( _id )
+    $(_id)
       .accordion({
         active: 0,
         header: '> div > h3',
@@ -841,15 +846,15 @@ function StudioCommon(runtime, element, initData) {
       .sortable({
         axis: 'y',
         handle: 'h3',
-        stop: function( event, ui ) {
+        stop: function (event, ui) {
           // IE doesn't register the blur when sorting
           // so trigger focusout handlers to remove .ui-state-focus
-          ui.item.children( 'h3' ).triggerHandler( 'focusout' );
-          if (type == 'categories'){
+          ui.item.children('h3').triggerHandler('focusout');
+          if (type === 'categories') {
             var categoriesContainer = $(categoriesPanel);
             commonObj.destroyAllEditors(categoriesContainer);
             commonObj.processCategories(categoriesContainer);
-          } else if (type == "ranges") {
+          } else if (type === "ranges") {
             var rangesContainer = $(rangesPanel);
             commonObj.destroyAllEditors(rangesContainer);
             commonObj.processRanges(rangesContainer);
@@ -860,7 +865,7 @@ function StudioCommon(runtime, element, initData) {
           }
         }
       });
-    };
+  };
 
   commonObj.removeCategoryFromOptions = function (category) {
     // remove category option from all result dropdowns at step 3
@@ -873,11 +878,11 @@ function StudioCommon(runtime, element, initData) {
   commonObj.renderSingleCategory = function (order, category) {
     //Render html for a single category
 
-    if (typeof category == 'undefined') {
+    if (typeof category === 'undefined') {
       category = {id: '', name: '', image: '', group: '', internal_description: '', html_body: ''};
     }
 
-    if (typeof category.id == 'undefined') {
+    if (typeof category.id === 'undefined') {
       category['id'] = '';
     }
 
@@ -895,7 +900,7 @@ function StudioCommon(runtime, element, initData) {
   commonObj.renderSingleRange = function (order, range) {
     //Render html for a single range
 
-    if (typeof range == 'undefined') {
+    if (typeof range === 'undefined') {
       range = {name: '', min_value: '', max_value: '', image: '', group: '', internal_description: '', html_body: ''};
     }
 
@@ -918,7 +923,7 @@ function StudioCommon(runtime, element, initData) {
     var returnChoiceObj = typeof returnChoiceObj !== 'undefined' ? returnChoiceObj : false;
     var group = typeof group !== 'undefined' ? group : initData.DEFAULT_GROUP;
 
-    if (typeof choice == 'undefined') {
+    if (typeof choice === 'undefined') {
       choice = {name: '', value: '', category_id: ''};
     }
 
@@ -942,7 +947,7 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.renderSingleQuestion = function (order, question) {
     //Render html for a single question
-    if (typeof question == 'undefined') {
+    if (typeof question === 'undefined') {
       question = {
         id: '',
         title: '',
