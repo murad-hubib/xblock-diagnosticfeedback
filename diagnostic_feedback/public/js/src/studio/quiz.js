@@ -156,7 +156,7 @@ function Quiz(runtime, element, initData) {
                 msg: '<br />' +
                 gettext('Your data has been successfully saved.') +
                 '<br />' +
-                gettext('However, some answer combinations in "' + showInvalidChoiceValueWarning. warningGroup +
+                gettext('However, some answer combinations in "' + showInvalidChoiceValueWarning.warningGroup +
                   '" may not belong to any result in that group.') +
                 '<a class="close_msg" href="#" style="float: right">' +
                 gettext('Close') +
@@ -343,7 +343,9 @@ function Quiz(runtime, element, initData) {
               studioCommon.hideAddGrpPanel(el);
               studioCommon.updateAllGroups(response.grp_name);
               studioCommon.updateAllResultGroupDropwdowns();
-              $(el).parent().parent().next().find('select').first().val(response.grp_name).change();
+
+              $(el).parents('.new-grp-container').next().filter('.existing-grps-list').find('select').first()
+                .val(response.grp_name).change();
             } else {
               success = true;
               warning = false;
@@ -565,5 +567,5 @@ function Quiz(runtime, element, initData) {
       runtime.modal.editOptions.refresh(runtime.modal.xblockInfo);
     });
   });
-  
+
 }

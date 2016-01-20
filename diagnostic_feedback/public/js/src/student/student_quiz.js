@@ -44,6 +44,11 @@ function StudentQuiz(runtime, element, initData) {
       currentAnswerContainer = ".diagnostic-feedback .current",
       studentViewFormSecSelector = ".diagnostic-feedback .student_view_form section",
       questionId = '.question-id',
+      lessonContentSelector = '.lesson-content',
+      contentSelector = ".content",
+      questionContaner = '.q-container',
+      quizQuestion = '.quiz-question',
+      userAnswers = '.user-answers',
       selectedStudentChoice = 'input[type="radio"]:checked',
       exportDataBtnSelector = ".export_data";
 
@@ -119,11 +124,11 @@ function StudentQuiz(runtime, element, initData) {
 
     function getQuestionEventData(choice) {
       // get text of question and selected answer text
-      var choice = $('input[type="radio"][value="' + choice + '"]:visible'),
-        student_choice = choice.next().text(),
-        question_txt = choice.parent().prev().find('p').text();
+      var choice = $('input[type="radio"][value="' + choice + '"]:visible', element),
+        student_choice = choice.parent(userAnswers).find('label[for="' + choice.attr('id') + '"]').text(),
+        question_txt = choice.parents(questionContaner).find(quizQuestion).text();
 
-      return {'question_txt': question_txt, 'student_choice': student_choice}
+      return {'question_txt': question_txt, 'student_choice': student_choice};
     }
 
     function submitQuestionResponse(isLast, currentStep, newIndex) {
@@ -142,30 +147,14 @@ function StudentQuiz(runtime, element, initData) {
         data: JSON.stringify(choice),
         success: function (response) {
           success = response.success;
-
-          if (success && response.student_result) {
-            //log event for quiz finish
-
-            var event_data = {
-              event_type: 'xblock.diagnostic_feedback.quiz.finish',
-              quiz_type: initData.quiz_type,
-              quiz_title: initData.quiz_title,
-              current_question: currentStep
-            };
-
-            common.publishEvent(event_data);
-            showResult(response.student_result);
-          }
-
-          var qEventData = getQuestionEventData(choice.student_choice);
-
-          var event_data = {
+          var questionEventData = getQuestionEventData(choice.student_choice),
+            event_data = {
               event_type: '',
-              question_txt: qEventData.question_txt,
-              student_choice: qEventData.student_choice,
+              question_txt: questionEventData.question_txt,
+              student_choice: questionEventData.student_choice,
               current_question: currentStep,
               is_last_question: isLast
-          };
+            };
 
           if(success){
             //log event for question submission success
@@ -179,6 +168,17 @@ function StudentQuiz(runtime, element, initData) {
                 question_number: newIndex + 1,
                 is_last_question: isLast
               });
+
+            } else if (response.student_result) {
+              //log event for quiz finish
+
+              common.publishEvent({
+                event_type: 'xblock.diagnostic_feedback.quiz.finish',
+                quiz_type: initData.quiz_type,
+                quiz_title: initData.quiz_title,
+                current_question: currentStep
+              });
+              showResult(response.student_result);
             }
 
           } else {
@@ -243,9 +243,10 @@ function StudentQuiz(runtime, element, initData) {
         quiz_title: initData.quiz_title
       };
 
-      var totalQuestions = $('.question-container').length;
-      var completedStep = parseInt($(completedStepSelector, element).val()) ;
-      if (completedStep == totalQuestions){
+      var totalQuestions = $(questionContaner, element).length;
+      var completedStep = parseInt($(completedStepSelector, element).val());
+
+      if (completedStep === totalQuestions) {
         eventData.completed_questions = totalQuestions;
         // log event for result loading
         common.publishEvent({
@@ -276,7 +277,7 @@ function StudentQuiz(runtime, element, initData) {
       var isLast = (newIndex == $(studentViewFormSecSelector, element).length - 1);
 
       var status = saveOrSkip(isLast, currentStep, currentIndex, newIndex);
-      if(status == true){
+      if (status) {
         if(isLast){
           common.publishEvent({
             event_type: 'xblock.diagnostic_feedback.quiz.result.loaded'
@@ -298,7 +299,7 @@ function StudentQuiz(runtime, element, initData) {
       // for apros
       var target_height = 60;
 
-      if($('.lesson-content').length == 0){
+      if($(lessonContentSelector, element).length === 0){
         // for lms
         target_height = 120;
       }
@@ -307,13 +308,13 @@ function StudentQuiz(runtime, element, initData) {
 
       if(q_container.length == 0){
         //if final result
-        target_height = $(".response_body").height() + target_height;
+        target_height = $(finalResult, element).height() + target_height;
       } else {
         //if question
         target_height = q_container.height() + target_height;
       }
 
-      $(".content").animate({height: target_height + "px"}, 500);
+      $(contentSelector, element).animate({height: target_height + "px"}, 500);
     }
 
     function updateResultHtml(event, currentIndex, newIndex) {
@@ -365,14 +366,8 @@ function StudentQuiz(runtime, element, initData) {
           });
           return true;
         }
-        var selectedChoice = $(visibleAnswerChoice, element).find(selectedStudentChoice).val();
 
-        if (selectedChoice != "" && selectedChoice != undefined) {
-          return submitQuestionResponse(isLast, currentStep, newIndex);
-        } else {
-          common.showStudentValidationError({success: false, warning: false, msg: gettext('Please select an answer')});
-          return false;
-        }
+        return submitQuestionResponse(isLast, currentStep, newIndex);
       }
     }
 
