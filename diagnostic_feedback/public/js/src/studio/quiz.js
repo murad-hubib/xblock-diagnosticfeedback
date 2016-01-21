@@ -344,7 +344,7 @@ function Quiz(runtime, element, initData) {
               studioCommon.updateAllGroups(response.grp_name);
               studioCommon.updateAllResultGroupDropwdowns();
 
-              $(el).parents('.new-grp-container').next().filter('.existing-grps-list').find('select').first()
+              $(el).parents('.new-grp-container').next('.existing-grps-list').find('select').first()
                 .val(response.grp_name).change();
             } else {
               success = true;

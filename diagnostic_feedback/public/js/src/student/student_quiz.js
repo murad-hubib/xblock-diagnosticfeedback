@@ -46,7 +46,7 @@ function StudentQuiz(runtime, element, initData) {
       questionId = '.question-id',
       lessonContentSelector = '.lesson-content',
       contentSelector = ".content",
-      questionContaner = '.q-container',
+      questionContainer = '.q-container',
       quizQuestion = '.quiz-question',
       userAnswers = '.user-answers',
       selectedStudentChoice = 'input[type="radio"]:checked',
@@ -90,16 +90,16 @@ function StudentQuiz(runtime, element, initData) {
     function resetActions() {
       // hide start over button
       // show next, previous, finish action button
-      $(nextActionSelector + ', ' + previousActionSelector, element).show();
       $(cancelActionSelector, element).hide();
-      disableButton();
+      disableNextButton();
+      $(nextActionSelector + ', ' + previousActionSelector, element).show();
     }
 
-    function disableButton() {
+    function disableNextButton() {
       $(nextActionSelector, element).parent().addClass("disabled").attr("aria-" + "disabled", "true");
     }
 
-    function enableButton() {
+    function enableNextButton() {
       $(nextActionSelector, element).parent().removeClass("disabled").attr("aria-" + "disabled", "false");
     }
 
@@ -107,7 +107,7 @@ function StudentQuiz(runtime, element, initData) {
       // shows result of student
       var finalResultHtml = '<div class="html_body">' + result.html_body + '</div>';
       $(finalResult, element).html(finalResultHtml);
-      hideActions();
+//      hideActions();
       common.publishEvent({
         event_type: 'xblock.diagnostic_feedback.quiz.result',
         result_content: finalResultHtml
@@ -126,7 +126,7 @@ function StudentQuiz(runtime, element, initData) {
       // get text of question and selected answer text
       var choice = $('input[type="radio"][value="' + choice + '"]:visible', element),
         student_choice = choice.parent(userAnswers).find('label[for="' + choice.attr('id') + '"]').text(),
-        question_txt = choice.parents(questionContaner).find(quizQuestion).text();
+        question_txt = choice.parents(questionContainer).find(quizQuestion).text();
 
       return {'question_txt': question_txt, 'student_choice': student_choice};
     }
@@ -156,13 +156,13 @@ function StudentQuiz(runtime, element, initData) {
               is_last_question: isLast
             };
 
-          if(success){
+          if (success) {
             //log event for question submission success
             event_data.event_type = 'xblock.diagnostic_feedback.quiz.question.submitted';
             common.publishEvent(event_data);
 
-            //log event for loading question
             if (!isLast) {
+              //log event for loading question
               common.publishEvent({
                 event_type: 'xblock.diagnostic_feedback.quiz.question.loading',
                 question_number: newIndex + 1,
@@ -171,7 +171,6 @@ function StudentQuiz(runtime, element, initData) {
 
             } else if (response.student_result) {
               //log event for quiz finish
-
               common.publishEvent({
                 event_type: 'xblock.diagnostic_feedback.quiz.finish',
                 quiz_type: initData.quiz_type,
@@ -201,10 +200,8 @@ function StudentQuiz(runtime, element, initData) {
           quiz_type: initData.quiz_type,
           quiz_title: initData.quiz_title
         };
-
       //log event for quiz startover
       common.publishEvent(event_data);
-
 
       $.ajax({
         type: "POST",
@@ -213,9 +210,9 @@ function StudentQuiz(runtime, element, initData) {
         data: JSON.stringify({}),
         success: function (response) {
           success = response.success;
-          resetActions();
-
           if (success) {
+            $(choiceSelector, element).find(choiceSelectedBtnSelector).removeAttr('checked');
+            resetActions();
             event_data.event_type = 'xblock.diagnostic_feedback.quiz.startover.scuccess';
           } else {
             event_data.event_type = 'xblock.diagnostic_feedback.quiz.startover.failed';
@@ -242,7 +239,7 @@ function StudentQuiz(runtime, element, initData) {
         quiz_title: initData.quiz_title
       };
 
-      var totalQuestions = $(questionContaner, element).length;
+      var totalQuestions = $(questionContainer, element).length;
       var completedStep = parseInt($(completedStepSelector, element).val());
 
       if (completedStep === totalQuestions) {
@@ -253,7 +250,7 @@ function StudentQuiz(runtime, element, initData) {
         });
       } else {
         eventData.completed_questions = completedStep;
-        eventData.current_question =  completedStep + 1;
+        eventData.current_question = completedStep + 1;
         //log event for xblock started
         common.publishEvent(eventData);
       }
@@ -277,7 +274,7 @@ function StudentQuiz(runtime, element, initData) {
 
       var status = saveOrSkip(isLast, currentStep, currentIndex, newIndex);
       if (status) {
-        if(isLast){
+        if (isLast) {
           common.publishEvent({
             event_type: 'xblock.diagnostic_feedback.quiz.result.loaded'
           });
@@ -322,9 +319,9 @@ function StudentQuiz(runtime, element, initData) {
 
       resizeContentContainer();
       if ($(visibleAnswerChoice, element).find(selectedStudentChoice).val()) {
-        enableButton();
+        enableNextButton();
       } else {
-        disableButton();
+        disableNextButton();
       }
 
       var isLast = (currentIndex === $(studentViewFormSecSelector, element).length - 1);
@@ -336,15 +333,12 @@ function StudentQuiz(runtime, element, initData) {
     function startOver(event) {
       //If user have answered all the questions, start over button shown to again start the Quiz
       studentQuiz.startOver = true;
-      $(choiceSelector, element).find(choiceSelectedBtnSelector).removeAttr('checked');
       $form.children("div").steps("setStep", 0);
-      disableButton();
     }
 
 
     function saveOrSkip(isLast, currentStep, currentIndex, newIndex) {
       common.clearErrors();
-
       // if start over button is click just return and do nothing
       if (studentQuiz.startOver) {
 
@@ -396,7 +390,7 @@ function StudentQuiz(runtime, element, initData) {
 
     $(choiceSelectedBtnSelector).on('change', function () {
       if ($(selectedStudentChoice).val()) {
-        enableButton();
+        enableNextButton();
       }
     });
 

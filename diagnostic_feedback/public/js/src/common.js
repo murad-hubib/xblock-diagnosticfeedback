@@ -10,14 +10,8 @@ function Common(runtime, element, initData) {
     visibleUserAnswer = '.diagnostic-feedback .user-answers:visible',
     validateErrors = '.diagnostic-feedback .validation-error-message';
 
-
   cObj.clearErrors = function () {
     $(validateErrors, element).remove();
-  };
-
-  cObj.showStudentValidationError = function (msgObj) {
-    var $visibleUserAnswer = $(visibleUserAnswer, element);
-    $('<div class="validation-error-message">' + msgObj.msg + '<div>').insertBefore($visibleUserAnswer);
   };
 
   cObj.showGlobalMessage = function (msgObj) {
