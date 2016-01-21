@@ -120,7 +120,7 @@ class StudentDiagnosticStyleTest(StudentBaseTest):
     def test_startover(self):
         self.load_student_view('dg_quiz')
         next_btn = self._get_next_button()
-        back_btn_link =  self._get_previous_button_link()
+        back_btn_link = self._get_previous_button_link()
         back_btn = self._get_previous_button()
         next_btn_link = self._get_next_button_link()
         startover_link = self._get_startover_button_link()
