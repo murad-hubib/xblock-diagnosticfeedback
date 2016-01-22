@@ -25,53 +25,53 @@ function StudioCommon(runtime, element, initData) {
   // child selector' which are either searched in an element already in current XBlock instance scope OR
   // used as combination with some other selector, will be scoped to current XBlock instance (if required)
   // at their usage places
-    quizTitleSelector = '.diagnostic-feedback input[name*="title"]',
-    quizTypeSelector = '.diagnostic-feedback select[name*="type"] option:selected',
-    quizTypeInputSelector = '.diagnostic-feedback input[name*="type"]',
-    quizDescriptionSelector = '.diagnostic-feedback textarea[name*="description"]',
-    accordionSelector = '.accordion',
-    questionGroupFieldSelector = '.question-group',
+    quizTitle = '.diagnostic-feedback input[name*="title"]',
+    selectedQuizType = '.diagnostic-feedback select[name*="type"] option:selected',
+    quizTypeInput = '.diagnostic-feedback input[name*="type"]',
+    quizDescription = '.diagnostic-feedback textarea[name*="description"]',
+    accordionEl = '.accordion',
+    questionGroupField = '.question-group',
 
-    sortTitleSelector = '.sort-title',
-    sortTitleGrpSelector = '.sort-title-group',
-    sortTitleSrcSelector = '.sort-title-source',
+    sortTitle = '.sort-title',
+    sortTitleGroup = '.sort-title-group',
+    sortTitleSrc = '.sort-title-source',
 
-    accordionGrpSelector = ".group",
+    accordionGroup = ".group",
 
     editQuestionPanel = ".diagnostic-feedback .edit_questionnaire_panel",
-    questionPanelSelector = '.diagnostic-feedback .questions_panel',
-    questionSelector = '.question',
-    questionIdSelector = '.question-id',
-    questionFieldsContainerSelector = '.question-field',
-    questionTxtFieldSelector = '.question-txt',
-    questionTitleFieldSelector = '.question-title',
-    questionOrderSelector = ".question-order",
-    questionOrderFieldSelector = ".question-order-field",
+    questionPanel = '.diagnostic-feedback .questions_panel',
+    questionDiv = '.question',
+    questionIdField = '.question-id',
+    questionFieldsContainer = '.question-field',
+    questionTxtField = '.question-txt',
+    questionTitleField = '.question-title',
+    questionOrder = ".question-order",
+    questionOrderField = ".question-order-field",
 
     categoriesPanel = ".diagnostic-feedback .categories_panel",
-    categorySelector = '.category',
-    categoryIdSelector = 'input[name*="category[id]"]',
-    categoryOrderSelector = ".category-order",
-    categoryOrderFieldSelector = "input[name*='category[order]']",
+    categoryDiv = '.category',
+    categoryIdField = 'input[name*="category[id]"]',
+    categoryOrder = ".category-order",
+    categoryOrderField = "input[name*='category[order]']",
     tinyMceTextarea = '.custom-textarea',
 
     rangesPanel = '.diagnostic-feedback .ranges_panel',
-    rangeSelector = '.range',
-    rangeOrderSelector = ".range-order",
-    rangeOrderFieldSelector = "input[name*='range[order]']",
+    rangeDiv = '.range',
+    rangeOrderEl = ".range-order",
+    rangeOrderField = "input[name*='range[order]']",
 
     allChoiceValuesInputs = '.diagnostic-feedback .answer-choice .answer-value',
-    choiceSelector = '.answer-choice',
+    choiceDiv = '.answer-choice',
     allResultChoicesDropdowns = '.diagnostic-feedback .answer-choice .result-choice',
     questionResultChoicesDropdowns = '.answer-choice .result-choice',
     allQuestionGroupChoicesDropdowns = '.diagnostic-feedback .question-group',
     allResultGroupChoicesDropdowns = '.diagnostic-feedback .result-group',
-    choiceValueSelector = 'input[name*="]value["]',
-    choiceValueClsSelector = '.answer-value',
-    choiceNameSelector = 'input[name*=answer]',
-    choiceResultSelector = '.result-choice',
-    allResultChoiceSelector = '.diagnostic-feedback .result-choice',
-    choiceNameClsSelector = '.answer-txt';
+    choiceValueField = 'input[name*="]value["]',
+    choiceValueByClass = '.answer-value',
+    choiceName = 'input[name*=answer]',
+    choiceResult = '.result-choice',
+    allResultChoice = '.diagnostic-feedback .result-choice',
+    choiceNameByClass = '.answer-txt';
 
 
   var CUSTOM_FONTS, STANDARD_FONTS, _getFonts;
@@ -109,9 +109,9 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.getQuizType = function () {
     // get type of quiz from DOM
-    var q_type = $(quizTypeSelector, element).val();
+    var q_type = $(selectedQuizType, element).val();
     if (!q_type) {
-      q_type = $(quizTypeInputSelector, element).val();
+      q_type = $(quizTypeInput, element).val();
     }
     return q_type ? q_type : "";
   };
@@ -138,31 +138,31 @@ function StudioCommon(runtime, element, initData) {
     var _input = $(eventObject.currentTarget),
       inputVal = $(_input).val() === '' ? gettext("Untitled") : $(_input).val();
 
-    $(_input).parents(accordionGrpSelector).find(sortTitleSelector).html(inputVal);
+    $(_input).parents(accordionGroup).find(sortTitle).html(inputVal);
   };
 
   commonObj.bindSortTitleSources = function () {
-    $.each($(editQuestionPanel, element).find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector), function () {
+    $.each($(editQuestionPanel, element).find(sortTitleSrc + ', ' + questionTitleField), function () {
       $(this).unbind('keyup');
       $(this).bind('keyup', commonObj.updateResultSortTitle);
     });
   };
 
   commonObj.bindSortTitleSource = function (container) {
-    container.find(sortTitleSrcSelector + ', ' + questionTitleFieldSelector).bind('keyup', commonObj.updateResultSortTitle);
+    container.find(sortTitleSrc + ', ' + questionTitleField).bind('keyup', commonObj.updateResultSortTitle);
   };
 
   commonObj.getAllWQuestionsChoices = function () {
     // return array of array for all choices values of all questions (per group)
 
     var questionsChoices = {};
-    $.each($(questionPanelSelector + ' ' + questionSelector), function (i, question) {
-      var qGroup = $(question).find(questionGroupFieldSelector).val();
+    $.each($(questionPanel + ' ' + questionDiv), function (i, question) {
+      var qGroup = $(question).find(questionGroupField).val();
       if (!(qGroup in questionsChoices)) {
         questionsChoices[qGroup] = [];
       }
       var choices = [];
-      $.each($(question).find(choiceValueSelector), function (j, choice) {
+      $.each($(question).find(choiceValueField), function (j, choice) {
         choices.push(parseFloat($(choice).val()));
       });
       questionsChoices[qGroup].push(choices);
@@ -222,13 +222,13 @@ function StudioCommon(runtime, element, initData) {
     return isInArray;
   };
 
-  commonObj.showAddGrpPanel = function (btn) {
+  commonObj.showAddGroupPanel = function (btn) {
     // show add new grou panel
     btn.parent().parent().addClass('hidden');
     btn.parent().parent().prev().removeClass('hidden');
   };
 
-  commonObj.hideAddGrpPanel = function (btn) {
+  commonObj.hideAddGroupPanel = function (btn) {
     // show grops list dropdown
     btn.parent().parent().addClass('hidden');
     btn.parent().parent().next().removeClass('hidden');
@@ -241,7 +241,7 @@ function StudioCommon(runtime, element, initData) {
         txt = "( " + txt + " )";
       }
     }
-    el.parents(accordionGrpSelector).find(sortTitleGrpSelector).text(txt);
+    el.parents(accordionGroup).find(sortTitleGroup).text(txt);
   };
 
   // tinymce methods start
@@ -574,7 +574,7 @@ function StudioCommon(runtime, element, initData) {
       }
       commonObj.updateAttachedGroups(results);
       commonObj.updateAllQuestionGroupDropwdowns();
-      commonObj.initiateHtmlEditor($(questionPanelSelector, element), true);
+      commonObj.initiateHtmlEditor($(questionPanel, element), true);
     }
   };
 
@@ -595,21 +595,21 @@ function StudioCommon(runtime, element, initData) {
     var questionTitle = initData.block_id + '_question[' + i + '][title]';
     var questionGroup = initData.block_id + '_question[' + i + '][group]';
     var questionText = initData.block_id + '_question[' + i + '][text]';
-    $(question).find(questionTitleFieldSelector).first().attr({'name': questionTitle, id: questionTitle});
-    $(question).find(questionGroupFieldSelector).first().attr({'name': questionGroup, id: questionGroup});
-    $(question).find(questionTxtFieldSelector).first().attr({'name': questionText, id: questionText});
+    $(question).find(questionTitleField).first().attr({'name': questionTitle, id: questionTitle});
+    $(question).find(questionGroupField).first().attr({'name': questionGroup, id: questionGroup});
+    $(question).find(questionTxtField).first().attr({'name': questionText, id: questionText});
   };
 
   commonObj.updateChoiceFieldAttr = function (choice, i) {
     //Update name/id attributes of a given choice field
-    var questionName = $(choice).parent().prevAll(questionFieldsContainerSelector).find(questionTxtFieldSelector).first().attr('name').split("][")[0] + "]";
+    var questionName = $(choice).parent().prevAll(questionFieldsContainer).find(questionTxtField).first().attr('name').split("][")[0] + "]";
     var ChoiceAnswer = questionName + 'answer[' + i + ']';
     var ChoiceValue = questionName + 'value[' + i + ']';
     var CategoryValue = questionName + 'category[' + i + ']';
 
-    $(choice).find(choiceNameSelector).attr({id: ChoiceAnswer, name: ChoiceAnswer});
-    $(choice).find(choiceResultSelector).attr({id: CategoryValue, name: CategoryValue});
-    $(choice).find(choiceValueSelector).attr({id: ChoiceValue, name: ChoiceValue});
+    $(choice).find(choiceName).attr({id: ChoiceAnswer, name: ChoiceAnswer});
+    $(choice).find(choiceResult).attr({id: CategoryValue, name: CategoryValue});
+    $(choice).find(choiceValueField).attr({id: ChoiceValue, name: ChoiceValue});
   };
 
   commonObj.confirmAction = function (msg) {
@@ -620,7 +620,7 @@ function StudioCommon(runtime, element, initData) {
   commonObj.generateUniqueId = function () {
     // return unique id for category/question
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
   };
@@ -713,8 +713,8 @@ function StudioCommon(runtime, element, initData) {
 
     var type = commonObj.getQuizType();
     return {
-      title: $(quizTitleSelector, element).val(),
-      description: $(quizDescriptionSelector, element).val(),
+      title: $(quizTitle, element).val(),
+      description: $(quizDescription, element).val(),
       type: type
     }
   };
@@ -738,31 +738,31 @@ function StudioCommon(runtime, element, initData) {
   commonObj.getStep3Data = function () {
     // Get step3 data before posting to server
 
-    var questionContainers = $(questionPanelSelector + " " + questionSelector);
+    var questionContainers = $(questionPanel + " " + questionDiv);
     var questions = [];
     $.each(questionContainers, function (i, container) {
-      var group = $(container).find(questionGroupFieldSelector).val();
+      var group = $(container).find(questionGroupField).val();
 
       var questionObj = {
-        order: $(container).find(questionOrderFieldSelector).val(),
-        question_title: $(container).find(questionTitleFieldSelector).val(),
+        order: $(container).find(questionOrderField).val(),
+        question_title: $(container).find(questionTitleField).val(),
         group: group !== "" ? group.trim() : initData.DEFAULT_GROUP,
-        question_txt: $(container).find(questionTxtFieldSelector).val(),
+        question_txt: $(container).find(questionTxtField).val(),
         choices: []
       };
 
-      var id = $(container).find(questionIdSelector).first().val();
+      var id = $(container).find(questionIdField).first().val();
       if (!id) {
         id = commonObj.generateUniqueId();
-        $(container).find(questionIdSelector).first().val(id);
+        $(container).find(questionIdField).first().val(id);
       }
       questionObj['id'] = id;
-      var answerChoicesInputs = $(container).find(choiceNameClsSelector);
+      var answerChoicesInputs = $(container).find(choiceNameByClass);
       $.each(answerChoicesInputs, function (j, choice) {
         var answerChoice = {
           'choice_txt': $(choice).val(),
-          'choice_value': $(choice).nextAll(choiceValueClsSelector).first().val(),
-          'choice_category': $(choice).nextAll(choiceResultSelector).val()
+          'choice_value': $(choice).nextAll(choiceValueByClass).first().val(),
+          'choice_category': $(choice).nextAll(choiceResult).val()
         };
         questionObj['choices'].push(answerChoice);
       });
@@ -779,13 +779,13 @@ function StudioCommon(runtime, element, initData) {
   commonObj.processCategories = function (categoriesContainer) {
 
     //update attributes of all category fields after sort/delete
-    var remainingCategories = categoriesContainer.find(categorySelector);
+    var remainingCategories = categoriesContainer.find(categoryDiv);
 
     $.each(remainingCategories, function (i, category) {
       var fields = $(category).find('input[type="text"], select, input[type="hidden"], textarea');
 
-      $(category).parent().prev().find(categoryOrderSelector).html(i + 1);
-      $(category).find(categoryOrderFieldSelector).val(i);
+      $(category).parent().prev().find(categoryOrder).html(i + 1);
+      $(category).find(categoryOrderField).val(i);
 
       $.each(fields, function (k, field) {
         commonObj.updateFieldAttr($(field), i);
@@ -799,12 +799,12 @@ function StudioCommon(runtime, element, initData) {
   commonObj.processRanges = function (rangesContainer) {
     //update attributes of all range fields after sort/delete
 
-    var remainingRanges = rangesContainer.find(rangeSelector);
+    var remainingRanges = rangesContainer.find(rangeDiv);
     $.each(remainingRanges, function (i, range) {
       var fields = $(range).find('input[type="text"], select, input[type="number"], input[type="hidden"], textarea');
 
-      $(range).parent().prev().find(rangeOrderSelector).html(i + 1);
-      $(range).find(rangeOrderFieldSelector).val(i);
+      $(range).parent().prev().find(rangeOrderEl).html(i + 1);
+      $(range).find(rangeOrderField).val(i);
 
       $.each(fields, function (k, field) {
         commonObj.updateFieldAttr($(field), i);
@@ -817,21 +817,21 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.processQuestions = function (questionsContainer) {
     // rename all remaining question fields including its choice
-    var remainingQuestions = questionsContainer.find(questionSelector);
+    var remainingQuestions = questionsContainer.find(questionDiv);
     $.each(remainingQuestions, function (i, question) {
-      $(question).parent().prev().find(questionOrderSelector).html(i + 1);
-      $(question).find(questionOrderFieldSelector).val(i);
+      $(question).parent().prev().find(questionOrder).html(i + 1);
+      $(question).find(questionOrderField).val(i);
 
       // rename all questions & choices fields after deletion of a question
       commonObj.updateQuestionFieldAttr(question, i);
-      var questionChoices = $(question).find(choiceSelector);
+      var questionChoices = $(question).find(choiceDiv);
       $.each(questionChoices, function (j, choice) {
         commonObj.updateChoiceFieldAttr(choice, j);
       });
     });
 
     // Re-attach tinymce after fields renaming
-    commonObj.initiateHtmlEditor($(questionPanelSelector, element));
+    commonObj.initiateHtmlEditor($(questionPanel, element));
   };
 
   commonObj.createAccordion = function (_id, type) {
@@ -859,7 +859,7 @@ function StudioCommon(runtime, element, initData) {
             commonObj.destroyAllEditors(rangesContainer);
             commonObj.processRanges(rangesContainer);
           } else {
-            var questionsContainer = $(questionPanelSelector);
+            var questionsContainer = $(questionPanel);
             commonObj.destroyAllEditors(questionsContainer);
             commonObj.processQuestions(questionsContainer);
           }
@@ -869,9 +869,9 @@ function StudioCommon(runtime, element, initData) {
 
   commonObj.removeCategoryFromOptions = function (category) {
     // remove category option from all result dropdowns at step 3
-    var categoryId = category.find(categoryIdSelector).val();
+    var categoryId = category.find(categoryIdField).val();
 
-    $(allResultChoiceSelector + " option[value='" + categoryId + "']", element).remove();
+    $(allResultChoice + " option[value='" + categoryId + "']", element).remove();
   };
 
 
@@ -894,7 +894,7 @@ function StudioCommon(runtime, element, initData) {
     var tpl = _.template(initData.categoryTpl),
       html = tpl(category);
 
-    $(categoriesPanel).find(accordionSelector).append(html);
+    $(categoriesPanel).find(accordionEl).append(html);
   };
 
   commonObj.renderSingleRange = function (order, range) {
@@ -912,7 +912,7 @@ function StudioCommon(runtime, element, initData) {
     var tpl = _.template(initData.rangeTpl),
       html = tpl(range);
 
-    $(rangesPanel).find(accordionSelector).append(html);
+    $(rangesPanel).find(accordionEl).append(html);
   };
 
 
@@ -978,7 +978,7 @@ function StudioCommon(runtime, element, initData) {
     var tpl = _.template(initData.questionTpl),
       html = tpl(question);
 
-    $(questionPanelSelector).find(accordionSelector).append(html);
+    $(questionPanel).find(accordionEl).append(html);
   };
 
   commonObj.renderCategories = function () {

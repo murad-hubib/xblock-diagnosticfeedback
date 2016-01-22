@@ -7,12 +7,12 @@ function CustomValidator(runtime, element, initData) {
     common = new Common(runtime, element, initData),
 
   //selectors
-    rangeMinSelector = "input[name*='range[min]']",
-    rangeMaxSelector = "input[name*='range[max]']",
-    rangeGrpSelector = "input[name*='range[group]']",
+    rangeMinField = "input[name*='range[min]']",
+    rangeMaxField = "input[name*='range[max]']",
+    rangeGroupField = "input[name*='range[group]']",
     rangesPanel = '.diagnostic-feedback .ranges_panel',
-    grpSelector = '.group',
-    rangeSelector = '.range';
+    groupDiv = '.group',
+    rangeDiv = '.range';
 
   if (typeof gettext === "undefined") {
     window.gettext = function gettext_stub(string) {
@@ -30,8 +30,8 @@ function CustomValidator(runtime, element, initData) {
     // return true/false
     var valid = true;
 
-    var rangeMinValue = $(range).find(rangeMinSelector).val();
-    var rangeMaxValue = $(range).find(rangeMaxSelector).val();
+    var rangeMinValue = $(range).find(rangeMinField).val();
+    var rangeMaxValue = $(range).find(rangeMaxField).val();
     if (rangeMinValue !== "" && isNaN(parseFloat(rangeMinValue))) {
       valid = false;
       common.showMessage({success: valid, msg: gettext('Range Min value must be float')});
@@ -49,18 +49,18 @@ function CustomValidator(runtime, element, initData) {
   validatorObj.validateViaSimpleComparisons = function (range) {
     // validate if any two ranges are overlapping
     var valid = true,
-      range1MinValue = parseFloat($(range).find(rangeMinSelector).val()),
-      range1MaxValue = parseFloat($(range).find(rangeMaxSelector).val()),
-      range1Group = $(range).find(rangeGrpSelector).val();
+      range1MinValue = parseFloat($(range).find(rangeMinField).val()),
+      range1MaxValue = parseFloat($(range).find(rangeMaxField).val()),
+      range1Group = $(range).find(rangeGroupField).val();
 
     range1Group = range1Group ? range1Group : initData.DEFAULT_GROUP;
-    var nextRanges = $(range).parents(grpSelector).nextAll(grpSelector).find(rangeSelector);
+    var nextRanges = $(range).parents(groupDiv).nextAll(groupDiv).find(rangeDiv);
 
 
     $.each(nextRanges, function (n, nextRange) {
-      var range2MinValue = parseFloat($(nextRange).find(rangeMinSelector).val()),
-        range2MaxValue = parseFloat($(nextRange).find(rangeMaxSelector).val()),
-        range2Group = $(nextRange).find(rangeGrpSelector).val(),
+      var range2MinValue = parseFloat($(nextRange).find(rangeMinField).val()),
+        range2MaxValue = parseFloat($(nextRange).find(rangeMaxField).val()),
+        range2Group = $(nextRange).find(rangeGroupField).val(),
 
       //overlap = range1.min <= range2.max && range2.min <= range1.max;
         overlap = range1Group === range2Group && range1MinValue <= range2MaxValue && range2MinValue <= range1MaxValue;
@@ -84,7 +84,7 @@ function CustomValidator(runtime, element, initData) {
     // validate for min/max AND overlapping
 
     var valid = true;
-    $.each($(rangesPanel + ' ' + rangeSelector, element), function (r, range) {
+    $.each($(rangesPanel + ' ' + rangeDiv, element), function (r, range) {
       if (!validatorObj.validateMinMax(range)) {
         valid = false;
         return valid;
