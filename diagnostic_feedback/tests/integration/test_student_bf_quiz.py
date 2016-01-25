@@ -22,12 +22,12 @@ class StudentBuzzFeedStyleTest(StudentBaseTest):
 
         # verify 1st question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=0, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 1st question, it should load next question i;e (question 2)
+        # submit 1st question, it should load next question (question 2)
         self._submit_question()
 
         # verify 2nd question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=1, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 2nd question, it should load next question i;e (question 3)
+        # submit 2nd question, it should load next question (question 3)
         self._submit_question()
 
         # verify 3rd question for all necessary checks, also select 1st choice for this question
@@ -59,12 +59,12 @@ class StudentBuzzFeedStyleTest(StudentBaseTest):
 
         # verify 1st question for all necessary checks, also select 2nd choice for this question
         self._verify_question(question_order=0, next_btn=next_btn, back_btn=back_btn, choice_idx=1)
-        # submit 1st question, it should load next question i;e (question 2)
+        # submit 1st question, it should load next question (question 2)
         self._submit_question()
 
         # verify 2nd question for all necessary checks, also select 2nd choice for this question
         self._verify_question(question_order=1, next_btn=next_btn, back_btn=back_btn, choice_idx=1)
-        # submit 2nd question, it should load next question i;e (question 3)
+        # submit 2nd question, it should load next question (question 3)
         self._submit_question()
 
         # verify 3rd question for all necessary checks, also select 2nd choice for this question
@@ -96,12 +96,12 @@ class StudentBuzzFeedStyleTest(StudentBaseTest):
 
         # verify 1st question for all necessary checks, also select 3rd choice for this question
         self._verify_question(question_order=0, next_btn=next_btn, back_btn=back_btn, choice_idx=2)
-        # submit 1st question, it should load next question i;e (question 2)
+        # submit 1st question, it should load next question (question 2)
         self._submit_question()
 
         # verify 2nd question for all necessary checks, also select 3rd choice for this question
         self._verify_question(question_order=1, next_btn=next_btn, back_btn=back_btn, choice_idx=2)
-        # submit 2nd question, it should load next question i;e (question 3)
+        # submit 2nd question, it should load next question (question 3)
         self._submit_question()
 
         # verify 3rd question for all necessary checks, also select 2nd choice for this question
@@ -133,27 +133,27 @@ class StudentBuzzFeedStyleTest(StudentBaseTest):
 
         # verify 1st question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=0, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 1st question, it should load next question i;e (question 2)
+        # submit 1st question, it should load next question (question 2)
         self._submit_question()
 
         # verify 2nd question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=1, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 2nd question, it should load next question i;e (question 3)
+        # submit 2nd question, it should load next question (question 3)
         self._submit_question()
 
         # verify 3rd question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=2, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 3rd question, it should load next question i;e (question 4)
+        # submit 3rd question, it should load next question (question 4)
         self._submit_question()
 
         # verify 4th question for all necessary checks, also select 2nd choice for this question
         self._verify_question(question_order=3, next_btn=next_btn, back_btn=back_btn, choice_idx=1)
-        # submit 4th question, it should load next question i;e (question 5)
+        # submit 4th question, it should load next question (question 5)
         self._submit_question()
 
         # verify 5th question for all necessary checks, also select 2nd choice for this question
         self._verify_question(question_order=4, next_btn=next_btn, back_btn=back_btn, choice_idx=1)
-        # submit 5th question, it should load next question i;e (question 6)
+        # submit 5th question, it should load next question (question 6)
         self._submit_question()
 
         # verify 6th question for all necessary checks, also select 2nd choice for this question

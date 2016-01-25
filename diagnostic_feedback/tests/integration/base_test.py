@@ -175,12 +175,12 @@ class StudentBaseTest(DiagnosticFeedbackBaseTest):
 
         # verify 1st question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=0, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 1st question, it should load next question i;e (question 2)
+        # submit 1st question, it should load next question (question 2)
         self._submit_question()
 
         # verify 2nd question for all necessary checks, also select 2nd choice for this question
         self._verify_question(question_order=1, next_btn=next_btn, back_btn=back_btn, choice_idx=1)
-        # submit 2nd question, it should load next question i;e (question 3)
+        # submit 2nd question, it should load next question (question 3)
         self._submit_question()
 
         # move back to 2nd question from 3rd question without doing any action
