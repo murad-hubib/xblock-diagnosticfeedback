@@ -34,33 +34,33 @@ function Quiz(runtime, element, initData) {
       addNewCategoryBtn = categoriesPanel + ' .add-new-category',
       addNewGroupBtn = '.add-new-group',
       deleteCategoryBtn = '.delete-category',
-      categorySelector = '.category',
-      editorSelector = '.custom-textarea',
-      questionGrpSelector = '.question-group',
-      resultGroupSelector = '.result-group',
-      grpError = 'group-error',
+      categoryDiv = '.category',
+      editorTextArea = '.custom-textarea',
+      questionGroup = '.question-group',
+      resultGroup = '.result-group',
+      groupError = 'group-error',
 
-      accordionSelector = '.accordion',
-      accordionGrpSelector = ".group",
-      openAddGroupPanelSelector = '.open-add-grp-panel',
-      closeAddGroupPanelSelector = '.close-add-grp-panel',
+      accordion = '.accordion',
+      accordionGroup = ".group",
+      openAddGroupPanel = '.open-add-grp-panel',
+      closeAddGroupPanel = '.close-add-grp-panel',
 
       rangesPanel = '.ranges_panel',
       addNewRangeBtn = rangesPanel + ' .add-new-range',
       deleteRangeBtn = '.delete-range',
-      rangeSelector = '.range',
+      rangeDiv = '.range',
 
       step3Panel = ".diagnostic-feedback section[step='3']",
       questionPanel = '.diagnostic-feedback .questions_panel',
       addNewQuestionBtn = '.add-new-question',
       deleteQuestionBtn = '.delete-question',
-      questionSelector = '.question',
+      questionDiv = '.question',
 
       addNewChoiceBtn = '.add-new-choice',
       deleteChoiceBtn = '.delete-choice',
-      choiceSelector = '.answer-choice',
-      toolTipSelector = '.diagnostic-feedback .custom-tooltip',
-      closeMsgBtnSelector = '.close_msg';
+      choiceDiv = '.answer-choice',
+      toolTip = '.diagnostic-feedback .custom-tooltip',
+      closeMsgBtn = '.close_msg';
 
     function renderSteps() {
       // render all steps html as XBlock studio view load
@@ -68,21 +68,21 @@ function Quiz(runtime, element, initData) {
       if (initData.quiz_type === "") {
         // when first time studio view opens with no initData
         studioCommon.renderCategories();
-        studioCommon.createAccordion(categoriesPanel + " " + accordionSelector, 'categories');
+        studioCommon.createAccordion(categoriesPanel + " " + accordion, 'categories');
 
         studioCommon.renderRanges();
-        studioCommon.createAccordion(rangesPanel + " " + accordionSelector, 'ranges');
+        studioCommon.createAccordion(rangesPanel + " " + accordion, 'ranges');
       } else if (initData.quiz_type === initData.BUZZFEED_QUIZ_VALUE) {
         // when editing buzzfeed-style quiz
         studioCommon.renderCategories();
-        studioCommon.createAccordion(categoriesPanel + " " + accordionSelector, 'categories');
+        studioCommon.createAccordion(categoriesPanel + " " + accordion, 'categories');
       } else {
         // when editing dignostic-style quiz
         studioCommon.renderRanges();
-        studioCommon.createAccordion(rangesPanel + " " + accordionSelector, 'ranges');
+        studioCommon.createAccordion(rangesPanel + " " + accordion, 'ranges');
       }
       studioCommon.renderQuestions();
-      studioCommon.createAccordion(questionPanel + " " + accordionSelector, 'questions');
+      studioCommon.createAccordion(questionPanel + " " + accordion, 'questions');
     }
 
     //initialize js validations if on in setting.js
@@ -91,14 +91,14 @@ function Quiz(runtime, element, initData) {
       $form.validate({
         success: function (label, element) {
           if ($(element).is("textarea")) {
-            $(element).prev(toolTipSelector).remove();
+            $(element).prev(toolTip).remove();
           } else {
-            $(element).next(toolTipSelector).remove();
+            $(element).next(toolTip).remove();
           }
 
           var groups = $(element).parents('.group');
           if (groups.length > 0) {
-            groups.removeClass(grpError);
+            groups.removeClass(groupError);
           }
         },
         errorPlacement: function errorPlacement(error, element) {
@@ -113,7 +113,7 @@ function Quiz(runtime, element, initData) {
 
           var groups = element.parents('.group');
           if (groups.length > 0) {
-            groups.addClass(grpError);
+            groups.addClass(groupError);
           }
 
           error.wrap(container);
@@ -281,12 +281,12 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        existingCategories = link.prev().find(accordionGrpSelector).length,
+        existingCategories = link.prev().find(accordionGroup).length,
         categoriesPanelObj = $(categoriesPanel, element);
 
       studioCommon.renderSingleCategory(existingCategories);
       studioCommon.initiateHtmlEditor(categoriesPanelObj);
-      studioCommon.refreshAccordion(categoriesPanel + " " + accordionSelector);
+      studioCommon.refreshAccordion(categoriesPanel + " " + accordion);
       studioCommon.bindSortTitleSource(categoriesPanelObj);
     });
 
@@ -295,27 +295,27 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        existingRanges = link.prev().find(accordionGrpSelector).length,
+        existingRanges = link.prev().find(accordionGroup).length,
         rangesPanelObj = $(rangesPanel, element);
 
       studioCommon.renderSingleRange(existingRanges);
       studioCommon.initiateHtmlEditor(rangesPanelObj);
-      studioCommon.refreshAccordion(rangesPanel + " " + accordionSelector);
+      studioCommon.refreshAccordion(rangesPanel + " " + accordion);
       studioCommon.bindSortTitleSource(rangesPanelObj);
     });
 
-    $(editQuestionPanel, element).on('click', openAddGroupPanelSelector, function (eventObject) {
+    $(editQuestionPanel, element).on('click', openAddGroupPanel, function (eventObject) {
       eventObject.preventDefault();
 
       var btn = $(eventObject.currentTarget);
-      studioCommon.showAddGrpPanel(btn);
+      studioCommon.showAddGroupPanel(btn);
     });
 
-    $(editQuestionPanel, element).on('click', closeAddGroupPanelSelector, function (eventObject) {
+    $(editQuestionPanel, element).on('click', closeAddGroupPanel, function (eventObject) {
       eventObject.preventDefault();
 
       var btn = $(eventObject.currentTarget);
-      studioCommon.hideAddGrpPanel(btn);
+      studioCommon.hideAddGroupPanel(btn);
     });
 
     $(editQuestionPanel, element).on('click', addNewGroupBtn, function (eventObject) {
@@ -340,10 +340,12 @@ function Quiz(runtime, element, initData) {
               success = true;
               warning = false;
               field.val('');
-              studioCommon.hideAddGrpPanel(el);
-              studioCommon.updateAllGroups(response.grp_name);
+              studioCommon.hideAddGroupPanel(el);
+              studioCommon.updateAllGroups(response.group_name);
               studioCommon.updateAllResultGroupDropwdowns();
-              $(el).parent().parent().next().find('select').first().val(response.grp_name).change();
+
+              $(el).parents('.new-grp-container').next('.existing-grps-list').find('select').first()
+                .val(response.group_name).change();
             } else {
               success = true;
               warning = false;
@@ -369,11 +371,11 @@ function Quiz(runtime, element, initData) {
       eventObject.preventDefault();
 
       var link = $(eventObject.currentTarget),
-        existingQuestions = link.prev().find(accordionGrpSelector).length;
+        existingQuestions = link.prev().find(accordionGroup).length;
 
       studioCommon.renderSingleQuestion(existingQuestions);
       studioCommon.initiateHtmlEditor($(questionPanel, element));
-      studioCommon.refreshAccordion(questionPanel + " " + accordionSelector);
+      studioCommon.refreshAccordion(questionPanel + " " + accordion);
       studioCommon.bindSortTitleSource($(questionPanel, element));
     });
 
@@ -382,9 +384,9 @@ function Quiz(runtime, element, initData) {
 
       eventObject.preventDefault();
       var link = $(eventObject.currentTarget),
-        group = link.parent(questionSelector).find(questionGrpSelector).val(),
-        existingQuestions = link.parents(accordionGrpSelector).prevAll(accordionGrpSelector).length,
-        existingChoices = link.prev().find(choiceSelector).length;
+        group = link.parent(questionDiv).find(questionGroup).val(),
+        existingQuestions = link.parents(accordionGroup).prevAll(accordionGroup).length,
+        existingChoices = link.prev().find(choiceDiv).length;
 
       var choiceHtml = studioCommon.renderSingleChoice(existingQuestions, existingChoices, undefined, false, group);
 
@@ -399,18 +401,18 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget),
         categoriesContainer = $(btn).parents(categoriesPanel).first();
 
-      if (categoriesContainer.find(categorySelector).length === 1) {
+      if (categoriesContainer.find(categoryDiv).length === 1) {
         // show waring if trying to delete last category
         common.showMessage({
           success: false,
           warning: true,
           persist: true,
           msg: gettext('At least one category is required')
-        }, categoriesContainer.find(accordionGrpSelector));
+        }, categoriesContainer.find(accordionGroup));
       } else {
         // ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this category?'))) {
-          var category = $(btn).parents(accordionGrpSelector);
+          var category = $(btn).parents(accordionGroup);
 
           //remove deleted category html at step3 from all category selection dropdowns
           studioCommon.removeCategoryFromOptions(category);
@@ -422,7 +424,7 @@ function Quiz(runtime, element, initData) {
           category.remove();
 
           // refresh accordion
-          studioCommon.refreshAccordion(categoriesPanel + " " + accordionSelector);
+          studioCommon.refreshAccordion(categoriesPanel + " " + accordion);
 
           // rename all remaining categories fields after deletion of a category
           studioCommon.processCategories(categoriesContainer);
@@ -437,24 +439,24 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget);
       var rangesContainer = $(btn).parents(rangesPanel).first();
 
-      if (rangesContainer.find(rangeSelector).length === 1) {
+      if (rangesContainer.find(rangeDiv).length === 1) {
         //show waring if trying to delete last range
         common.showMessage({
           success: false,
           warning: true,
           persist: true,
           msg: gettext('At least one range is required')
-        }, rangesContainer.find(accordionGrpSelector));
+        }, rangesContainer.find(accordionGroup));
       } else {
         // ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this range?'))) {
-          var range = $(btn).parents(accordionGrpSelector);
+          var range = $(btn).parents(accordionGroup);
           studioCommon.destroyAllEditors(rangesContainer);
 
           range.remove();
 
           // refresh accordion
-          studioCommon.refreshAccordion(rangesPanel + " " + accordionSelector);
+          studioCommon.refreshAccordion(rangesPanel + " " + accordion);
 
           // rename all remaining categories fields after deletion of a category
           studioCommon.processRanges(rangesContainer);
@@ -468,27 +470,27 @@ function Quiz(runtime, element, initData) {
       var btn = $(eventObject.currentTarget);
       var questionsContainer = $(btn).parents(questionPanel).first();
 
-      if (questionsContainer.find(questionSelector).length === 1) {
+      if (questionsContainer.find(questionDiv).length === 1) {
         //show waning if tring to delete last question
         common.showMessage({
           success: false,
           warning: true,
           persist: true,
           msg: gettext('At least one question is required')
-        }, questionsContainer.find(accordionGrpSelector));
+        }, questionsContainer.find(accordionGroup));
       } else {
         //ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this question?'))) {
-          var question = $(btn).parents(accordionGrpSelector);
+          var question = $(btn).parents(accordionGroup);
 
           // remove all tinymce binding before deleting question html
-          studioCommon.destroyEditor($(question).find(editorSelector));
+          studioCommon.destroyEditor($(question).find(editorTextArea));
 
           //remove question html from DOM
           question.remove();
 
           // refresh accordion
-          studioCommon.refreshAccordion(questionPanel + " " + accordionSelector);
+          studioCommon.refreshAccordion(questionPanel + " " + accordion);
 
           // rename all remaining categories fields after deletion of a category
           studioCommon.processQuestions(questionsContainer);
@@ -496,15 +498,15 @@ function Quiz(runtime, element, initData) {
       }
     });
 
-    $(questionPanel, element).on('change', questionGrpSelector, function (eventObject) {
+    $(questionPanel, element).on('change', questionGroup, function (eventObject) {
       eventObject.preventDefault();
       var group = $(eventObject.target).val();
-      var grpCategories = studioCommon.getGroupCategories(group);
+      var groupCategories = studioCommon.getGroupCategories(group);
       studioCommon.updateSortingGroupTxt($(eventObject.target), group);
-      studioCommon.updateAllResultDropwdowns($(eventObject.target), grpCategories);
+      studioCommon.updateAllResultDropwdowns($(eventObject.target), groupCategories);
     });
 
-    $(editQuestionPanel, element).on('change', resultGroupSelector, function (eventObject) {
+    $(editQuestionPanel, element).on('change', resultGroup, function (eventObject) {
       eventObject.preventDefault();
       var group = $(eventObject.target).val();
       studioCommon.updateSortingGroupTxt($(eventObject.target), group);
@@ -516,9 +518,9 @@ function Quiz(runtime, element, initData) {
       eventObject.preventDefault();
 
       var btn = $(eventObject.currentTarget);
-      var answersContainer = $(btn).parents(questionSelector).first();
+      var answersContainer = $(btn).parents(questionDiv).first();
 
-      if (answersContainer.find(choiceSelector).length === 1) {
+      if (answersContainer.find(choiceDiv).length === 1) {
         //show warning if trying to delete last choice
         common.showMessage({
           success: false,
@@ -529,10 +531,10 @@ function Quiz(runtime, element, initData) {
         //ask for confirmation before delete action
         if (studioCommon.confirmAction(gettext('Are you sure to delete this choice?'))) {
           //remove choice html from DOM
-          $(btn).parent(choiceSelector).remove();
+          $(btn).parent(choiceDiv).remove();
 
           // rename all remaining choices fields of specific question
-          var remainingChoices = answersContainer.find(choiceSelector);
+          var remainingChoices = answersContainer.find(choiceDiv);
           $.each(remainingChoices, function (j, choice) {
             studioCommon.updateChoiceFieldAttr(choice, j);
           });
@@ -540,7 +542,7 @@ function Quiz(runtime, element, initData) {
       }
     });
 
-    $(editQuestionPanel, element).on('click', closeMsgBtnSelector, function (eventObject) {
+    $(editQuestionPanel, element).on('click', closeMsgBtn, function (eventObject) {
       eventObject.preventDefault();
 
       var btn = $(eventObject.currentTarget);

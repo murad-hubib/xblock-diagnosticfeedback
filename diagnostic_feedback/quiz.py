@@ -334,26 +334,12 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
             success, response_message = Validator.validate_student_answer(self, data)
             if success:
                 question_id = data['question_id']
-                question_data = self.get_question(question_id)
-                if self.quiz_type == self.BUZZFEED_QUIZ_VALUE:
-                    question_answer = self.get_buzzfeed_answer(question_data['choices'], data['student_choice'])
-                else:
-                    question_answer = self.get_diagnostic_answer(question_data['choices'], data['student_choice'])
-
-                event_data = {
-                    'question_id': question_id,
-                    'question_title': question_data['title'],
-                    'question_text': question_data['text'],
-                    'answer': question_answer,
-                    'time': datetime.now()
-                }
 
                 # save student answer
                 self.student_choices[question_id] = data['student_choice']
                 if self.current_step < data['currentStep']:
                     self.current_step = data['currentStep']
 
-                self.runtime.publish(self, 'xblock.diagnostic_feedback.question.submitted', event_data)
                 # calculate feedback result if user answering last question
                 if data['isLast']:
                     student_result = self.get_result()
@@ -374,8 +360,6 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                         submission_data = self.create_submission_data()
                         submission_data['final_result'] = student_result
                         my_api.create_submission(item_key, json.dumps(submission_data))
-                    else:
-                        log.info("not sub_api intance")
 
                 response_message = self._("Your response is saved")
         except Exception as ex:
@@ -417,7 +401,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
             msg = self._('Group already exist.')
             success = False
 
-        return {'success': success, 'msg': msg, 'grp_name': grp_name}
+        return {'success': success, 'msg': msg, 'group_name': grp_name}
 
     @XBlock.json_handler
     def publish_event(self, data, suffix=''):
