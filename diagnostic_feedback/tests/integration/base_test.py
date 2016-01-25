@@ -169,18 +169,18 @@ class StudentBaseTest(DiagnosticFeedbackBaseTest):
         self.wait_until_visible(next_btn)
         # check if start-over button is hidden properly
         self.assertFalse(startover_link.is_displayed())
-        # check if next/previous buttons have 'disabled' classed after shown
+        # check if next/previous buttons have 'disabled' class after shown
         self.wait_until_has_class_disabled(next_btn)
         self.assertEqual(back_btn.get_attribute('class'), 'disabled')
 
         # verify 1st question for all necessary checks, also select 1st choice for this question
         self._verify_question(question_order=0, next_btn=next_btn, back_btn=back_btn, choice_idx=0)
-        # submit 1st question, it should load next question i;e (question => 2)
+        # submit 1st question, it should load next question i;e (question 2)
         self._submit_question()
 
         # verify 2nd question for all necessary checks, also select 2nd choice for this question
         self._verify_question(question_order=1, next_btn=next_btn, back_btn=back_btn, choice_idx=1)
-        # submit 2nd question, it should load next question i;e (question => 3)
+        # submit 2nd question, it should load next question i;e (question 3)
         self._submit_question()
 
         # move back to 2nd question from 3rd question without doing any action
@@ -237,5 +237,4 @@ class StudentBaseTest(DiagnosticFeedbackBaseTest):
         # submit question by clicking next link
         self._get_next_button_link().click()
         if wait_until_next_btn_disabled:
-            # wait until next button has 'disabled' class
             self.wait_until_has_class_disabled(self._get_next_button())

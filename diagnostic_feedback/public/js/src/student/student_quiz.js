@@ -108,7 +108,7 @@ function StudentQuiz(runtime, element, initData) {
       var finalResultHtml = '<div class="html_body">' + result.html_body + '</div>';
       $(finalResult, element).html(finalResultHtml);
       common.publishEvent({
-        event_type: 'xblock.diagnostic_feedback.quiz.result',
+        event_type: 'xblock.diagnostic_feedback.quiz.result.generated',
         result_content: finalResultHtml
       });
     }
@@ -145,6 +145,7 @@ function StudentQuiz(runtime, element, initData) {
         async: false,
         data: JSON.stringify(choice),
         success: function (response) {
+          console.log(response);
           success = response.success;
           var questionEventData = getQuestionEventData(choice.student_choice),
             event_data = {
@@ -237,7 +238,7 @@ function StudentQuiz(runtime, element, initData) {
         eventData.completed_questions = totalQuestions;
         // log event for result loading
         common.publishEvent({
-          event_type: 'xblock.diagnostic_feedback.quiz.result.loading'
+          event_type: 'xblock.diagnostic_feedback.quiz.result.reloading'
         });
       } else {
         eventData.completed_questions = completedStep;
