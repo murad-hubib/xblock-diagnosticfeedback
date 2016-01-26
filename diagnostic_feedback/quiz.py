@@ -347,7 +347,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                     if not self.completed:
                         # Save the latest score and make quiz completed
                         self.runtime.publish(self, 'grade', {
-                            'value': 1.0,
+                            'value': 0.5,
                             'max_value': 1.0
                         })
                         self.completed = True
