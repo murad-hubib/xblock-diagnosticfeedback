@@ -10,10 +10,6 @@ function Common(runtime, element, initData) {
         visibleUserAnswer = '.diagnostic-feedback .user-answers:visible',
         validateErrors = '.diagnostic-feedback .validation-error-message';
 
-    cObj.clearErrors = function () {
-        $(validateErrors, element).remove();
-    };
-
     cObj.showGlobalMessage = function (msgObj) {
         // display message at top right of page
         var _type = '';
