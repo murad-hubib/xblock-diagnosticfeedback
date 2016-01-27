@@ -138,15 +138,13 @@ function StudentQuiz(runtime, element, initData) {
             choice['currentStep'] = currentStep;
             choice['isLast'] = isLast;  //if student given last answer of the question, this flag is true.
 
-            var success = false;
             $.ajax({
                 type: "POST",
                 url: answerHandlerUrl,
-                async: false,
                 data: JSON.stringify(choice),
                 success: function (response) {
                     console.log(response);
-                    success = response.success;
+
                     var questionEventData = getQuestionEventData(choice.student_choice),
                         event_data = {
                             event_type: '',
@@ -156,7 +154,7 @@ function StudentQuiz(runtime, element, initData) {
                             is_last_question: isLast
                         };
 
-                    if (success) {
+                    if (response.success) {
                         //log event for question submission success
                         event_data.event_type = 'xblock.diagnostic_feedback.quiz.question.submitted';
                         common.publishEvent(event_data);
@@ -171,6 +169,8 @@ function StudentQuiz(runtime, element, initData) {
                             });
                             showResult(response.student_result);
                         }
+                        studentQuiz.movingToStep = true;
+                        $form.children("div").steps("setStep", newIndex);
 
                     } else {
                         //log event for quesiton submission error
@@ -180,12 +180,10 @@ function StudentQuiz(runtime, element, initData) {
                     }
                 }
             });
-            return success;
         }
 
         function startOverQuiz() {
             var startOverUrl = runtime.handlerUrl(element, 'start_over_quiz');
-            var success = false;
             var event_type = 'xblock.diagnostic_feedback.quiz.startover',
                 event_data = {
                     event_type: event_type,
@@ -198,25 +196,22 @@ function StudentQuiz(runtime, element, initData) {
             $.ajax({
                 type: "POST",
                 url: startOverUrl,
-                async: false,
                 data: JSON.stringify({}),
                 success: function (response) {
-                    success = response.success;
-                    if (success) {
+                    if (response.success) {
                         $(choiceDiv, element).find(choiceSelectedBtn).removeAttr('checked');
                         resetActions();
                         event_data.event_type = 'xblock.diagnostic_feedback.quiz.startover.success';
+                        studentQuiz.movingToStep = true;
+                        $form.children("div").steps("setStep", 0);
                     } else {
                         event_data.event_type = 'xblock.diagnostic_feedback.quiz.startover.failed';
                     }
                     event_data.response_message = response.msg;
+                    //log event for quiz start-over success/failure
+                    common.publishEvent(event_data);
                 }
             });
-
-
-            //log event for quiz start-over success/failure
-            common.publishEvent(event_data);
-            return success;
         }
 
 
@@ -256,7 +251,6 @@ function StudentQuiz(runtime, element, initData) {
 
         function changeStep(event, currentIndex, newIndex) {
             //on every step change this method either save the data to the server or skip it.
-
             var btn = $(nextAction, element).parent();
             if (btn.hasClass('disabled') && newIndex > currentIndex) {
                 return false;
@@ -325,17 +319,17 @@ function StudentQuiz(runtime, element, initData) {
         function startOver(event) {
             //If user have answered all the questions, start over button shown to again start the Quiz
             studentQuiz.startOver = true;
-            $form.children("div").steps("setStep", 0);
+            changeStep(event, 0, 0);
         }
 
 
         function saveOrSkip(isLast, currentStep, currentIndex, newIndex) {
-            common.clearErrors();
             // if start over button is click just return and do nothing
             if (studentQuiz.startOver) {
 
                 studentQuiz.startOver = false;
-                return startOverQuiz();
+                startOverQuiz();
+                return false;
 
             } else if (studentQuiz.movingToStep) {
                 studentQuiz.movingToStep = false;
@@ -351,7 +345,8 @@ function StudentQuiz(runtime, element, initData) {
                     return true;
                 }
 
-                return submitQuestionResponse(isLast, currentStep, newIndex);
+                submitQuestionResponse(isLast, currentStep, newIndex);
+                return false;
             }
         }
 
