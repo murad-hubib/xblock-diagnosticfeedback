@@ -45,6 +45,7 @@ function StudentQuiz(runtime, element, initData) {
             studentViewFormSection = ".diagnostic-feedback .student_view_form section",
             questionId = '.question-id',
             lessonContent = '.lesson-content',
+            courseContent = '.course-content',
             contentPanel = ".content",
             questionContainer = '.q-container',
             quizQuestion = '.quiz-question',
@@ -278,19 +279,19 @@ function StudentQuiz(runtime, element, initData) {
         function resizeContentContainer() {
             // resize content container
 
-            // for apros
+            // for lms
             var target_height = 60;
 
-            if ($(lessonContent, element).length === 0) {
-                // for lms
-                target_height = 120;
+            if ($(courseContent).length === 0) {
+                // for apros
+                target_height = 30;
             }
 
             var q_container = $(".question-container:visible .q-container");
 
             if (q_container.length === 0) {
                 //if final result
-                target_height = $(finalResult, element).height() + target_height;
+                target_height = $(finalResult, element).height() + target_height + 20;
             } else {
                 //if question
                 target_height = q_container.height() + target_height;
