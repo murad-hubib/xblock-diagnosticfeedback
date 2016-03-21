@@ -47,6 +47,8 @@
     padding-left: 30px;
     margin-bottom: 10px;
     line-height: normal;
+    display: block;
+    word-wrap: break-word;
 }
 
 .diagnostic-feedback-student .result{
@@ -61,6 +63,7 @@
 /*for apros*/
 .lesson-content .diagnostic-feedback-student .user-answers > input {
     margin-right: -25px;
+    float: left;
 }
 
 .lesson-content .diagnostic-feedback-student .wizard > .content > .body {
