@@ -176,7 +176,7 @@ function StudentQuiz(runtime, element, initData) {
                     } else {
                         //log event for quesiton submission error
                         event_data.event_type = 'xblock.diagnostic_feedback.quiz.question.submitError';
-                        event_data.response_msg = response.response_msg;
+                        event_data.response_msg = response.msg;
                         common.publishEvent(event_data);
                     }
                 }

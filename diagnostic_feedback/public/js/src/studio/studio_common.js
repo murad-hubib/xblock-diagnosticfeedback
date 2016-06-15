@@ -138,7 +138,7 @@ function StudioCommon(runtime, element, initData) {
         var _input = $(eventObject.currentTarget),
             inputVal = $(_input).val() === '' ? gettext("Untitled") : $(_input).val();
 
-        $(_input).parents(accordionGroup).find(sortTitle).html(inputVal);
+        $(_input).parents(accordionGroup).find(sortTitle).text(inputVal);
     };
 
     commonObj.bindSortTitleSources = function () {
@@ -492,8 +492,7 @@ function StudioCommon(runtime, element, initData) {
         $.each(categories, function (i, category) {
             var id = category.id,
                 name = category.name;
-
-            _html += "<option value='" + id + "'>" + name + "</option>";
+            _html += "<option value='" + id + "'>" + _.escape(name) + "</option>";
         });
 
         return dropdown.html() + _html;
@@ -784,7 +783,7 @@ function StudioCommon(runtime, element, initData) {
         $.each(remainingCategories, function (i, category) {
             var fields = $(category).find('input[type="text"], select, input[type="hidden"], textarea');
 
-            $(category).parent().prev().find(categoryOrder).html(i + 1);
+            $(category).parent().prev().find(categoryOrder).text(i + 1);
             $(category).find(categoryOrderField).val(i);
 
             $.each(fields, function (k, field) {
@@ -802,8 +801,7 @@ function StudioCommon(runtime, element, initData) {
         var remainingRanges = rangesContainer.find(rangeDiv);
         $.each(remainingRanges, function (i, range) {
             var fields = $(range).find('input[type="text"], select, input[type="number"], input[type="hidden"], textarea');
-
-            $(range).parent().prev().find(rangeOrderEl).html(i + 1);
+            $(range).parent().prev().find(rangeOrderEl).text(i + 1);
             $(range).find(rangeOrderField).val(i);
 
             $.each(fields, function (k, field) {
@@ -819,7 +817,7 @@ function StudioCommon(runtime, element, initData) {
         // rename all remaining question fields including its choice
         var remainingQuestions = questionsContainer.find(questionDiv);
         $.each(remainingQuestions, function (i, question) {
-            $(question).parent().prev().find(questionOrder).html(i + 1);
+            $(question).parent().prev().find(questionOrder).text(i + 1);
             $(question).find(questionOrderField).val(i);
 
             // rename all questions & choices fields after deletion of a question

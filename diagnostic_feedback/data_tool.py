@@ -45,7 +45,7 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
         self.active_export_task_id = ''
         if task_result.successful():
             if isinstance(task_result.result, dict) and not task_result.result.get('error'):
-                log.info('------------ _save_result- saving result ---------------')
+                log.debug('_save_result: saving result')
                 self.display_data = task_result.result['display_data']
                 del task_result.result['display_data']
                 self.last_export_result = task_result.result
@@ -67,12 +67,12 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
             course_key = getattr(self.scope_ids.usage_id, 'course_key', None)
             return dict(report_store.links_for(course_key)).get(self.last_export_result['report_filename'])
-        except Exception:
-            pass
+        except ImportError as ex:
+            log.error(ex.args)
 
     def _get_status(self):
         self.check_pending_export()
-        log.info("------------ in _get_status - return status ---------------")
+        log.debug(" _get_status: return status")
         log.info(self.download_url_for_last_report)
         return {
             'export_pending': bool(self.active_export_task_id),
@@ -86,7 +86,7 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
         """
         from .tasks import export_data as export_data_task  # Import here since this is edX LMS specific
         if self.active_export_task_id:
-            log.info("------------ in check_pending_export - checking status ---------------")
+            log.debug("check_pending_export: checking status")
             async_result = export_data_task.AsyncResult(self.active_export_task_id)
             if async_result.ready():
                 self._save_result(async_result)
@@ -94,10 +94,9 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
     @XBlock.json_handler
     def start_export(self, data, suffix=''):
         """ Start a new asynchronous export """
-        log.info("------------ in start_export ---------------")
+        log.debug("start_export handler: start")
         root_block_id = self.scope_ids.usage_id
         root_block_id = unicode(getattr(root_block_id, 'block_id', root_block_id))
-        #
 
         if not self.user_is_staff():
             return {'error': 'permission denied'}
@@ -106,11 +105,11 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
         self._delete_export()
         # Make sure we nail down our state before sending off an asynchronous task.
         self.save()
-        log.info("------------ in start_export - starting async task ---------------")
+        log.info("start_export handler: starting async export_data_task ")
         if my_api:
-            log.info("------------ in start_export - my_api found ---------------")
+            log.debug("start_export handler: my_api found ")
         else:
-            log.info("------------ in start_export - my_api not found ---------------")
+            log.debug("start_export handler: my_api not available")
 
         from .tasks import export_data as export_data_task  # Import here since this is edX LMS specific
         async_result = export_data_task.delay(
@@ -119,7 +118,7 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             root_block_id
         )
         if async_result.ready():
-            log.info("------------ in start_export- task ready ---------------")
+            log.debug("start_export handler: task ready")
             log.info(async_result.id)
             # In development mode, the task may have executed synchronously.
             # Store the result now, because we won't be able to retrieve it later :-/
@@ -129,8 +128,8 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
                 json.dumps(async_result.result)
             self._save_result(async_result)
         else:
-            log.info("------------ in start_export- saving id ---------------")
-            log.info(async_result.id)
+            log.debug("start_export handler: saving task id")
+            log.debug(async_result.id)
             # The task is running asynchronously. Store the result ID so we can query its progress:
             self.active_export_task_id = async_result.id
 

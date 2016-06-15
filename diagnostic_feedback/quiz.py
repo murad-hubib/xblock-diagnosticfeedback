@@ -159,11 +159,11 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
 
         """
         for question in questions:
-            if self.quiz_type == self.DIAGNOSTIC_QUIZ_VALUE:
-                question['student_choice'] = float(self.student_choices.get(question['id'])) if \
-                    self.student_choices.get(question['id']) else ''
-            else:
-                question['student_choice'] = self.student_choices.get(question['id'], '')
+            if question['id'] in self.student_choices:
+                if self.quiz_type == self.DIAGNOSTIC_QUIZ_VALUE:
+                    question['student_choice'] = float(self.student_choices.get(question['id']))
+                else:
+                    question['student_choice'] = self.student_choices.get(question['id'])
 
     def get_block_id(self):
         """
@@ -365,7 +365,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         except Exception as ex:
             success = False
             response_message += str(ex)
-        return {'success': success, 'student_result': student_result, 'response_msg': response_message}
+        return {'success': success, 'student_result': student_result, 'msg': response_message}
 
     @XBlock.json_handler
     def start_over_quiz(self, data, suffix=''):

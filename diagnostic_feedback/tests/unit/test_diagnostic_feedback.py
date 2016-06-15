@@ -1,9 +1,12 @@
 import json
 import os
 from base_test import BaseTest
+
 from .wizard_step_mixin import WizardStepMixin
 
-from nose.tools import (assert_equals)
+from nose.tools import (assert_equals, assert_true, assert_false)
+import logging
+log = logging.getLogger(__name__)
 
 
 class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
@@ -68,17 +71,20 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_step':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_title':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_type':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_title_type':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == "missing_description":
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'valid_data':
-                assert_equals(res['success'], True)
+                assert_true(res['success'])
+            else:
+                # if unknown type fail forcefully
+                assert_true(False)
 
         assert_equals(self._block.title, 'Test')
         assert_equals(self._block.quiz_type, self._block.DIAGNOSTIC_QUIZ_VALUE)
@@ -96,25 +102,28 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             data = json.dumps(data)
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
             if _type == 'missing_categories':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_id_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_id_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_name_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_name_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'valid':
-                assert_equals(res['success'], True)
+                assert_true(res['success'])
+            else:
+                # if unknown type fail forcefully
+                assert_true(False)
 
         assert_equals(len(self._block.results), 2)
 
@@ -131,33 +140,36 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_ranges':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_name_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_name_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'min_max_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'min_max_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'min_max_case3':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'overlapping_ranges_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'overlapping_ranges_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'overlapping_ranges_case3':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'valid':
-                assert_equals(res['success'], True)
+                assert_true(res['success'])
+            else:
+                # if unknown type fail forcefully
+                assert_true(False)
 
         assert_equals(len(self._block.results), 2)
 
@@ -182,50 +194,53 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_questions':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_id_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_id_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_txt_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_txt_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_title_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_title_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_category_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_category_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_ques_choice_category_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_ques_choice_category_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choices_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choices_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_txt_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_txt_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_group_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_group_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
 
             elif _type == 'valid':
-                assert_equals(res['success'], True)
+                assert_true(res['success'])
+            else:
+                # if unknown type fail forcefully
+                assert_true(False)
 
         assert_equals(len(self._block.questions), 2)
 
@@ -250,49 +265,52 @@ class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):
             res = json.loads(self._block.handle('save_data', self.make_request(data)).body)
 
             if _type == 'missing_questions':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_id_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_id_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_txt_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_txt_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_title_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_title_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choices_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choices_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_txt_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_txt_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_value_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_ques_choice_value_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_datatype_choice_value_case1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_datatype_choice_value_case2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_group_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'missing_order_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_group_case_1':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
             elif _type == 'invalid_group_case_2':
-                assert_equals(res['success'], False)
+                assert_false(res['success'])
 
             elif _type == 'valid':
-                assert_equals(res['success'], True)
+                assert_true(res['success'])
+            else:
+                # if unknown type fail forcefully
+                assert_true(False)
 
         assert_equals(len(self._block.questions), 2)

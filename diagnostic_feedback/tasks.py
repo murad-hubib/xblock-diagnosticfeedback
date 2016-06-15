@@ -60,8 +60,10 @@ def export_data(course_id, source_block_id_str):
             "display_data": [] if len(rows) == 1 else rows
         }
 
-    except Exception:
-        pass
+    except ImportError as ex:
+        logger.error(ex.args)
+    except Exception as ex:
+        logger.error(ex.args)
 
     return response
 
@@ -106,5 +108,5 @@ def _get_submissions(course_key_str, block_type, block_id):
     """
     # Load the actual student submissions for `question`.
     # Note this requires one giant query that retrieves all student submissions for `question` at once.
-    logger.debug('in _get_submissions: ')
-    return my_api.get_all_submissions(course_key_str, block_id, block_type)
+    logger.debug('getting all submissions')
+    return my_api.get_all_submissions(course_key_str, block_id, block_type) if my_api else []

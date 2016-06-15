@@ -3,7 +3,7 @@ import os
 from base_test import BaseTest
 from .wizard_step_mixin import WizardStepMixin
 
-from nose.tools import (assert_equals)
+from nose.tools import (assert_equals, assert_true, assert_false)
 
 
 class StudentViewAjaxTest(BaseTest, WizardStepMixin):
@@ -38,25 +38,25 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
 
     def setUp(self):
         self._block = self.make_block()
-        self._daignostic_answer = json.loads(self.load_json_resource('data/answer_diagnostic_test_data.json'))
+        self._diagnostic_answer = json.loads(self.load_json_resource('data/answer_diagnostic_test_data.json'))
         self._buzzfeed_answer = json.loads(self.load_json_resource('data/answer_buzzfeed_test_data.json'))
 
     def test_diagnostic_answer(self):
 
         # add diagnostic quiz
         res = self.save_wizard_step1(self._block.DIAGNOSTIC_QUIZ_VALUE)
-        assert_equals(res['success'], True)
+        assert_true(res['success'])
 
         # add ranges for diagnostic quiz
         res = self.save_diagnostic_step2()
-        assert_equals(res['success'], True)
+        assert_true(res['success'])
 
         # add Questions for diagnostic Quiz
         res = self.save_diagnostic_step3()
-        assert_equals(res['success'], True)
+        assert_true(res['success'])
 
         for question_data in self._block.questions:
-            for _type, data in self._daignostic_answer.items():
+            for _type, data in self._diagnostic_answer.items():
                 if _type == 'missing_id':
                     data['question_id'] = ''
                 else:
@@ -64,30 +64,33 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                 json_data = json.dumps(data)
                 res = json.loads(self._block.handle('save_choice', self.make_request(json_data)).body)
                 if _type == 'missing_choice':
-                    assert_equals(res['success'], False)
+                    assert_false(res['success'])
                 elif _type == 'missing_id':
-                    assert_equals(res['success'], False)
+                    assert_false(res['success'])
                 elif _type == 'missing_step':
-                    assert_equals(res['success'], False)
-                if _type == 'valid_data':
+                    assert_false(res['success'])
+                elif _type == 'valid_data':
                     if data['isLast'] == "True":
-                        assert_equals(res['success'], True)
+                        assert_true(res['success'])
                     else:
-                        assert_equals(res['success'], True)
+                        assert_true(res['success'])
+                else:
+                    # forcefully fail if type unknown
+                    assert_true(False)
 
     def test_buzzfeed_answer(self):
 
         # set quiz as buzzfeed
         res = self.save_wizard_step1(self._block.BUZZFEED_QUIZ_VALUE)
-        assert_equals(res['success'], True)
+        assert_true(res['success'])
 
         # set categories for buzzfeed quiz
         res = self.save_buzzfeed_step2()
-        assert_equals(res['success'], True)
+        assert_true(res['success'])
 
         # set questions for buzzfeed Quiz
         res = self.save_buzzfeed_step3()
-        assert_equals(res['success'], True)
+        assert_true(res['success'])
 
         for question_data in self._block.questions:
             for _type, data in self._buzzfeed_answer.items():
@@ -98,16 +101,19 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                 json_data = json.dumps(data)
                 res = json.loads(self._block.handle('save_choice', self.make_request(json_data)).body)
                 if _type == 'missing_choice':
-                    assert_equals(res['success'], False)
+                    assert_false(res['success'])
                 elif _type == 'missing_id':
-                    assert_equals(res['success'], False)
+                    assert_false(res['success'])
                 elif _type == 'missing_step':
-                    assert_equals(res['success'], False)
+                    assert_false(res['success'])
                 elif _type == 'valid_data':
                     if data['isLast'] == "True":
-                        assert_equals(res['success'], True)
+                        assert_true(res['success'])
                     else:
-                        assert_equals(res['success'], True)
+                        assert_true(res['success'])
+                else:
+                    # forcefully fail if type unknown
+                    assert_true(False)
 
     def tearDown(self):
         self._block = None

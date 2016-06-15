@@ -19,14 +19,6 @@ class BaseValidator(object):
         """
         return not value.strip()
 
-    def invalid_url(self, url):
-        """
-        check for valid url
-        :param value: url to test
-        :return: Boolean
-        """
-        return url.strip() and not url.strip().startswith('http')
-
     def empty_list(self, lst):
         """
         check if a list is empty

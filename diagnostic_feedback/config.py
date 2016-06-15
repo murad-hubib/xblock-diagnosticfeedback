@@ -22,9 +22,9 @@ student_assets = {
 studio_assets = {
     'css': [
         ('public/css/jquery.steps.css', 0),
-        ('public/css/tooltip.css', 0),
-        ('public/css/studio_style.css', 1),
-        ('public/css/message.css', 2)
+        ('public/css/tooltip.css', 1),
+        ('public/css/studio_style.css', 2),
+        ('public/css/message.css', 3)
     ],
     'js': [
         # libs

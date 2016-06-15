@@ -51,7 +51,8 @@ function Common(runtime, element, initData) {
         } else {
             _type = 'error-msg';
         }
-        var html = '<div class="validation-msg ' + _type + '"><h3>' + msgObj.msg + '</h3></div>';
+
+        var html = '<div class="validation-msg ' + _type + '"><h3>' + _.escape(msgObj.msg) + '</h3></div>';
         $(container).append(html);
 
         if (!msgObj.persist) {
