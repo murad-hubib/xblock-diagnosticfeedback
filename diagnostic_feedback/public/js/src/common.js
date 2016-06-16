@@ -20,13 +20,13 @@ function Common(runtime, element, initData) {
 
         if (msgObj.success) {
             _type = 'success-msg';
-            title = 'Success! ' + msgObj.msg;
+            title = gettext('Success! ') + msgObj.msg;
         } else if (msgObj.warning) {
             _type = 'warning-msg';
-            title = 'Warning! ' + msgObj.msg;
+            title = gettext('Warning! ') + msgObj.msg;
         } else {
             _type = 'error-msg';
-            title = 'Error! ' + msgObj.msg;
+            title = gettext('Error! ') + msgObj.msg;
         }
         msg.addClass(_type);
         msg.find('h3').html(title);
@@ -51,7 +51,6 @@ function Common(runtime, element, initData) {
         } else {
             _type = 'error-msg';
         }
-
         var html = '<div class="validation-msg ' + _type + '"><h3>' + _.escape(msgObj.msg) + '</h3></div>';
         $(container).append(html);
 

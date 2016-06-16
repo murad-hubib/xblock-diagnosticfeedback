@@ -173,42 +173,6 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         # Try accessing block ID. If usage_id does not have it, return usage_id itself
         return unicode(getattr(usage_id, 'block_id', usage_id))
 
-    def get_question(self, question_id):
-        """
-        Return Question object for given question id
-        """
-        question = {}
-        for question in self.questions:
-            if question['id'] == question_id:
-                question = question
-                break
-
-        return question
-
-    def get_buzzfeed_answer(self, choices, student_choice):
-        """
-        Return buzzfeed quiz answer label from question choices using student choice
-        """
-        choice_name = ''
-        for choice in choices:
-            if choice['category_id'] == student_choice:
-                choice_name = choice['name']
-                break
-
-        return choice_name
-
-    def get_diagnostic_answer(self, choices, student_choice):
-        """
-        Return diagnostic quiz answer label from question choices using student choice
-        """
-        choice_name = ''
-        for choice in choices:
-            if str(choice['value']) == student_choice:
-                choice_name = choice['name']
-                break
-
-        return choice_name
-
     def student_view(self, context=None):
         """
         it will loads student view
@@ -353,7 +317,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
                         self.completed = True
 
                     if my_api:
-                        log.info("have sub_api instance")
+                        log.info("have submission api instance")
                         # Also send to the submissions API:
                         item_key = self.student_item_key
                         item_key['item_id'] = self.get_block_id()
@@ -414,19 +378,35 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
         self.runtime.publish(self, event_type, data)
         return {'result': 'ok'}
 
+    def create_choices_map(self, questions):
+        all_questions_choice_labels_map = {}
+
+        for question in questions:
+            if not question['id'] in all_questions_choice_labels_map:
+                all_questions_choice_labels_map[question['id']] = {}
+
+            for choice in question['choices']:
+                if self.quiz_type == self.BUZZFEED_QUIZ_VALUE:
+                    all_questions_choice_labels_map[question['id']][choice['category_id']] = choice['name']
+                else:
+                    all_questions_choice_labels_map[question['id']][str(choice['value'])] = choice['name']
+
+        return all_questions_choice_labels_map
+
     def create_submission_data(self):
         """
         Return a complete submission data as quiz completed
         """
         submission = {}
+        all_questions_choice_labels_map = self.create_choices_map(self.questions)
+
         for question in self.questions:
             question_id = question['id']
-            question_data = self.get_question(question_id)
+
             if self.quiz_type == self.BUZZFEED_QUIZ_VALUE:
-                question_answer = self.get_buzzfeed_answer(question_data['choices'], self.student_choices[question_id])
+                question_answer = all_questions_choice_labels_map[question_id][self.student_choices[question_id]]
             else:
-                question_answer = self.get_diagnostic_answer(question_data['choices'],
-                                                             self.student_choices[question_id])
+                question_answer =  all_questions_choice_labels_map[question_id][self.student_choices[question_id]]
 
             submission[question_id] = {
                 'question_text': question['text'],

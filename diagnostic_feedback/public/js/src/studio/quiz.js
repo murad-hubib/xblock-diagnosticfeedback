@@ -180,8 +180,8 @@ function Quiz(runtime, element, initData) {
                                 msg: '<br />' +
                                 gettext('Your data has been successfully saved.') +
                                 '<br />' +
-                                gettext('However, some answer combinations in "' + showInvalidChoiceValueWarning.warningGroup +
-                                    '" may not belong to any result in that group.') +
+                                gettext('However, some answer combinations in "') + showInvalidChoiceValueWarning.warningGroup +
+                                    gettext('" may not belong to any result in that group.') +
                                 '<a class="close_msg" href="#" style="float: right">' +
                                 gettext('Close') +
                                 '</a>'

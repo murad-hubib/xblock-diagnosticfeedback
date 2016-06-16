@@ -5,8 +5,6 @@ from base_test import BaseTest
 from .wizard_step_mixin import WizardStepMixin
 
 from nose.tools import (assert_equals, assert_true, assert_false)
-import logging
-log = logging.getLogger(__name__)
 
 
 class DiagnosticFeedbackAjaxTest(BaseTest, WizardStepMixin):

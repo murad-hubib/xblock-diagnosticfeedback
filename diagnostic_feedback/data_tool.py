@@ -89,6 +89,12 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             log.debug("check_pending_export: checking status")
             async_result = export_data_task.AsyncResult(self.active_export_task_id)
             if async_result.ready():
+                # In development mode, the task may have executed synchronously.
+                # Store the result now, because we won't be able to retrieve it later :-/
+                if async_result.successful():
+                    # Make sure the result can be represented as JSON, since the non-eager celery
+                    # requires that
+                    json.dumps(async_result.result)
                 self._save_result(async_result)
 
     @XBlock.json_handler
@@ -117,21 +123,10 @@ class ExportDataBlock(XBlock, SubmittingXBlockMixin):
             unicode(getattr(self.runtime, 'course_id', 'course_id')),
             root_block_id
         )
-        if async_result.ready():
-            log.debug("start_export handler: task ready")
-            log.info(async_result.id)
-            # In development mode, the task may have executed synchronously.
-            # Store the result now, because we won't be able to retrieve it later :-/
-            if async_result.successful():
-                # Make sure the result can be represented as JSON, since the non-eager celery
-                # requires that
-                json.dumps(async_result.result)
-            self._save_result(async_result)
-        else:
-            log.debug("start_export handler: saving task id")
-            log.debug(async_result.id)
-            # The task is running asynchronously. Store the result ID so we can query its progress:
-            self.active_export_task_id = async_result.id
+        log.debug("start_export handler: saving task id")
+        log.debug(async_result.id)
+        # The task is running asynchronously. Store the result ID so we can query its progress:
+        self.active_export_task_id = async_result.id
 
         return self._get_status()
 
