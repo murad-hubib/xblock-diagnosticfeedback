@@ -62,8 +62,6 @@ def export_data(course_id, source_block_id_str):
 
     except ImportError as ex:
         logger.error(ex.args)
-    except Exception as ex:
-        logger.error(ex.args)
 
     return response
 

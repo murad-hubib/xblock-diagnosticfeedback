@@ -70,10 +70,7 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                 elif _type == 'missing_step':
                     assert_false(res['success'])
                 elif _type == 'valid_data':
-                    if data['isLast'] == "True":
-                        assert_true(res['success'])
-                    else:
-                        assert_true(res['success'])
+                    assert_true(res['success'])
                 else:
                     # forcefully fail if type unknown
                     assert_true(False)
@@ -107,10 +104,7 @@ class StudentViewAjaxTest(BaseTest, WizardStepMixin):
                 elif _type == 'missing_step':
                     assert_false(res['success'])
                 elif _type == 'valid_data':
-                    if data['isLast'] == "True":
-                        assert_true(res['success'])
-                    else:
-                        assert_true(res['success'])
+                    assert_true(res['success'])
                 else:
                     # forcefully fail if type unknown
                     assert_true(False)
