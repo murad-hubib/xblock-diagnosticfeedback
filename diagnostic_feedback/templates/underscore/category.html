@@ -17,13 +17,14 @@
             <% }%>
         </span> )
         <span class="action-button">
-            <a href="#" data-tooltip="<%- gettext('Copy Category') %>" class="copy-category copy-button action-button">
-                <i class="icon fa fa-copy"></i>
+            <a href="#" data-tooltip="<%- gettext('Copy Category') %>"
+               class="copy-category copy-button action-button">
+                <i class="icon fa fa-copy" aria-hidden="true"></i>
                 <span class="sr"><%- gettext('Copy') %></span>
             </a>
 
             <a href="#" data-tooltip="<%- gettext('Delete Category') %>" class="delete-category delete-button action-button">
-                <i class="icon fa fa-trash-o"></i>
+                <i class="icon fa fa-trash-o" aria-hidden="true"></i>
                 <span class="sr"><%- gettext('Delete') %></span>
             </a>
         </span>
@@ -39,31 +40,34 @@
                    name="<%- block_id %>_category[id][<%- order %>]" class="skip-validation"
                    value="<%- id %>"/>
 
-            <input placeholder="<%- gettext('Name') %>" type="text"
+            <input placeholder="<%- gettext('Name') %>" type="text" aria-label="<%- gettext('Name') %>"
                    id="<%- block_id %>_category[name][<%- order %>]"
                    name="<%- block_id %>_category[name][<%- order %>]"
                    class="required sort-title-source" required value="<%- name %>"/>
 
             <input placeholder="<%- gettext('Image URL') %> (e.g. /static/img15.jpg)" type="text"
+                   aria-label="<%- gettext('Image URL') %>"
                    class="image-url"
                    id="<%- block_id %>_category[image][<%- order %>]"
                    name="<%- block_id %>_category[image][<%- order %>]" value="<%- image %>"/>
 
             <span class="group-container">
                 <span class="new-grp-container hidden" >
-                    <input type="text" placeholder="<%- gettext('Create new group') %>" class="new-grp-name" value="" />
+                    <input type="text" placeholder="<%- gettext('Create new group') %>"
+                           aria-label="<%- gettext('Create new group') %>"
+                           class="new-grp-name" value="" />
                     <div class="field-actions">
                         <a href="#" class="add-new-group" title="<%- gettext('Click to save') %>">
-                            <i class="icon fa fa-save"></i>
+                            <i class="icon fa fa-save" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="close-add-grp-panel" title="<%- gettext('Cancel') %>">
-                            <i class="icon fa fa-remove"></i>
+                            <i class="icon fa fa-remove" aria-hidden="true"></i>
                         </a>
                     </div>
 
                 </span>
                 <span class="existing-grps-list">
-                    <select id="<%- block_id %>_category[group][<%- order %>]"
+                    <select id="<%- block_id %>_category[group][<%- order %>]" aria-label="<%- gettext('Group') %>"
                             name="<%- block_id %>_category[group][<%- order %>]"
                             class="result-group" >
                         <% _.each(allGroups, function(c_group) { %>
@@ -73,8 +77,9 @@
                         <% }); %>
                     </select>
                     <div class="field-actions">
-                        <a title="<%- gettext('Click to add new group') %>" class="button button-new open-add-grp-panel" href="#">
-                            <i class="fa fa-plus"></i>
+                        <a title="<%- gettext('Click to add new group') %>" class="button button-new open-add-grp-panel"
+                           href="#">
+                            <i class="fa fa-plus" aria-hidden="true"></i>
                         </a>
                     </div>
                 </span>
@@ -82,6 +87,7 @@
             </span>
 
             <input placeholder="<%- gettext('Notes for author; not shown to students') %>"
+                   aria-label="<%- gettext('Notes for author; not shown to students     ') %>"
                    class="internal-description"
                    type="text"
                    id="<%- block_id %>_category[internal_description][<%- order %>]"
@@ -89,6 +95,7 @@
                    value="<%- internal_description %>"/>
 
             <textarea class="custom-textarea" placeholder="<%- gettext('Html Body') %>"
+                       aria-label="<%- gettext('Html Body') %>"
                   id="<%- block_id %>_category[html_body][<%- order %>]"
                   name="<%- block_id %>_category[html_body][<%- order %>]"><%- html_body %></textarea>
         </div>

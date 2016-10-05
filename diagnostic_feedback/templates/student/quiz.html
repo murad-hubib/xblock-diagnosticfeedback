@@ -14,10 +14,12 @@
 
             <section class="answer-choice question-container">
                 <div class="q-container">
-                    <h3 class="question-title">{{ question.title }} </h3>
+                    <fieldset>
+                    <legend class="question-title">{{ question.title }} </legend>
 
                     <div class="quiz-question">{{ question.text|safe }}</div>
                     <div class="user-answers">
+
                         {% for choice in question.choices %}
                         {% if self.quiz_type == self.BUZZFEED_QUIZ_VALUE %}
                         <input type="radio" id="{{block_id}}_{{ question.id }}_choice_{{ forloop.counter }}"
@@ -36,8 +38,10 @@
                         {% endif %}
                         <label for="{{block_id}}_{{question.id}}_choice_{{ forloop.counter }}">{{choice.name|safe }}</label> <br>
                         {% endfor %}
+
                         <input type="hidden" class="question-id" value="{{ question.id }}"/>
                     </div>
+                 </fieldset>
                 </div>
             </section>
             {% endfor %}
@@ -56,7 +60,7 @@
     <div class="wrapper-xblock-message xblock-validation-messages"
          data-locator="block-v1:edX+DemoX+Demo_Course+type@problem-builder+block@377b15c71a784ecf97ecdefbdff14540">
         <div class="xblock-message validation has-errors ">
-            <p class="error"><i class="icon fa fa-exclamation-circle"></i>
+            <p class="error"><i class="icon fa fa-exclamation-circle" aria-hidden="true"></i>
                 {% trans "Please add questions." %}
             </p>
         </div>

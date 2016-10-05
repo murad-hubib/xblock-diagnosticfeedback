@@ -27,6 +27,7 @@
 .diagnostic-feedback-student .question-title {
     text-transform: uppercase;
     font-weight: bold;
+    font-size: 20px;
 }
 
 .diagnostic-feedback-student .user-answers {
