@@ -209,6 +209,7 @@ class QuizBlock(ResourceMixin, QuizResultMixin, ExportDataBlock, XBlockWithTrans
 
         return choice_name
 
+    @XBlock.supports("multi_device")  # Mark as mobile-friendly
     def student_view(self, context=None):
         """
         it will loads student view
