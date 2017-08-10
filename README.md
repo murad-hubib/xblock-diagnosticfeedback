@@ -81,3 +81,69 @@ following command:
 $ ./run_tests.py
 ```
 
+API for native mobile frontends
+-------------------------------
+**Retrieve fixed data for all Diagnostic Feedback XBlocks in a course:**
+```
+GET https://<lms_server_url>/api/courses/v1/blocks/?course_id=<course_id>&username=<username>&depth=all&requested_fields=student_view_data
+```
+
+Example diagnostic feedback return value:
+```
+"student_view_data": {
+    "quiz_title": "Dummy title",
+    "description": "<p>Dummy description</p>",
+    "questions": [
+        {
+            "group": "Default Group",
+            "title": "Lorem ipsum",
+            "text": "<p>Dummy text</p>",
+            "choices": [
+                {
+                    "name": "<p>Dummy choice one</p>",
+                    "value": 1
+                },
+                {
+                    "name": "<p>Dummy choice two</p>",
+                    "value": 2
+                }
+            ],
+            "order": "0",
+            "id": "2c051c1c-2877-48db-b784-24094fcefbec"
+        },
+        {
+            "group": "Default Group",
+            "title": "Dummy diagnostic",
+            "text": "<p>Diagnostic text</p>",
+            "choices": [
+                {
+                    "name": "<p>Dummy diagnostic choice</p>",
+                    "value": 3
+                }
+            ],
+            "order": "1",
+            "id": "69bee8a6-60a1-4083-93ba-8a47f96a18e1"
+        }
+    ],
+    "quiz_type": "DG"
+},
+```
+
+**Retrieve user's current state**
+```
+GET https://<lms_server_url>/courses/<course_id>/xblock/<diagnostic_feedback_xblock_id>/handler/student_view_user_state
+```
+
+Example return value:
+```
+{
+    "current_step":3,
+    "student_result":"Dummy result",
+    "completed":true,
+    "student_choices":{
+        "a1b072ea-e65a-459d-b3a4-98016d96e095":"e1d01ab8-43af-4989-9519-d3880fb7945d",
+        "d39a8c6a-a35c-4a25-9f41-6a472169bdac":"e1d01ab8-43af-4989-9519-d3880fb7945d",
+        "cdb6e12e-4109-4997-b8ee-77406f434c74":"e1d01ab8-43af-4989-9519-d3880fb7945d"
+    }
+}
+```
