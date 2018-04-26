@@ -8,6 +8,14 @@
     display: block;
 }
 
+.diagnostic-feedback-studio .content {
+    min-width: calc(100% - 1em);
+}
+
+.diagnostic-feedback .wizard > .content > .body{
+    width: 95%;
+}
+
 .diagnostic-feedback-studio .edit_questionnaire_panel {
     padding: 2px;
 }
@@ -23,7 +31,7 @@
 
 .diagnostic-feedback-studio .answer-choice,
 .diagnostic-feedback-studio .add-new-choice {
-    margin: 10px 85px;
+    margin: 10px 10px 10px 85px;
 }
 
 .diagnostic-feedback-studio .question-field {
@@ -36,7 +44,7 @@
 }
 
 .diagnostic-feedback-studio .answer-txt-editor {
-    width: 350px;
+    width: calc(100% - 265px);
     display: inline-block;
 }
 
