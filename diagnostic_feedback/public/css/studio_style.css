@@ -48,6 +48,11 @@
     display: inline-block;
 }
 
+.answer-txt-editor > .mce-tinymce {
+    outline: 1px solid #9e9e9e;
+    border: 0;
+}
+
 .diagnostic-feedback-studio .range > input,
 .diagnostic-feedback-studio .category > input,
 .diagnostic-feedback-studio .question-field > input,

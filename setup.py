@@ -22,7 +22,7 @@ def package_data(pkg, roots):
 
 setup(
     name='xblock-diagnostic-feedback',
-    version='0.2.3',
+    version='0.2.4',
     description='XBlock - Create quiz to generate diagnostic feedback',
     packages=[
         'diagnostic_feedback',
